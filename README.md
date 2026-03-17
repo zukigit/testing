@@ -1,0 +1,1 @@
+# It is automated integration testing
