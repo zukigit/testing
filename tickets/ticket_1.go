@@ -1,14 +1,16 @@
 package tickets
 
+import "github.com/zukigit/testing/models"
+
 type Ticket1 struct {
 	Ticket_no                                   uint
 	Ticket_description                          string
 	PASSED_count, FAILED_count, MUSTCHECK_count int
-	Testcases                                   []TestCase
+	Testcases                                   []models.TestCase
 }
 
-func (t *Ticket1) New_testcase(testcase_id uint, testcase_description string) *TestCase {
-	return New_testcase(testcase_id, testcase_description)
+func (t *Ticket1) New_testcase(testcase_id uint, testcase_description string) *models.TestCase {
+	return models.New_testcase(testcase_id, testcase_description)
 }
 
 func (t *Ticket1) Get_ticket_no() uint {
@@ -39,24 +41,23 @@ func (t *Ticket1) Set_ticket_description(testcase_description string) {
 	t.Ticket_description = testcase_description
 }
 
-func (t *Ticket1) Add_testcase(tc *TestCase) {
+func (t *Ticket1) Add_testcase(tc *models.TestCase) {
 	t.Testcases = append(t.Testcases, *tc)
 }
 
-func (t *Ticket1) Get_testcases() []TestCase {
+func (t *Ticket1) Get_testcases() []models.TestCase {
 	return t.Testcases
 }
 
-// Add your test case here
 func (t *Ticket1) Prepare() {
-	t.Set_ticket_no(1) // Enter your ticket id here
+	t.Set_ticket_no(1)
 	t.Set_ticket_description("Enter your ticket description here.")
 
 	// TESTCASE 1
-	tc := t.New_testcase(3, "Enter your test case description here.")
-	tc_func := func() Testcase_status {
+	tc := t.New_testcase(1, "Enter your test case description here.")
+	tc_func := func() models.Testcase_status {
 		//Enter your testcase function here
-		return FAILED
+		return models.FAILED
 	}
 	tc.Set_function(tc_func)
 	t.Add_testcase(tc)

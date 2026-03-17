@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/zukigit/testing/lib"
+	"github.com/zukigit/testing/models"
 	tickets "github.com/zukigit/testing/tickets"
 )
 
-var ts []tickets.Ticket
-var tcs []tickets.TestCase
+var ts []models.Ticket
+var tcs []models.TestCase
 
 func collectTcs() {
 	for _, ticket := range ts {
@@ -22,10 +22,10 @@ func collectTcs() {
 
 func runTcs() {
 	for _, testcase := range tcs {
-		lib.InfoLog.Println("running")
+		// lib.InfoLog.Println("running")
 		if testcase.Is_function_nil() {
-			testcase.Set_status(tickets.FAILED)
-			lib.InfoLog.Printf("testcase: %d has no function. SKIPPED", testcase.Get_testcase_no())
+			testcase.Set_status(models.FAILED)
+			// lib.InfoLog.Printf("testcase: %d has no function. SKIPPED", testcase.Get_testcase_no())
 		} else {
 			// start time
 			startTime := time.Now()
@@ -38,7 +38,7 @@ func runTcs() {
 
 			testcase.Set_duration(durationStr)
 		}
-		lib.InfoLog.Println("done running!")
+		// lib.InfoLog.Println("done running!")
 	}
 }
 
