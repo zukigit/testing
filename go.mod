@@ -1,4 +1,4 @@
-module github.com/zukigit/testing.git
+module github.com/zukigit/testing
 
 go 1.25.8
 
