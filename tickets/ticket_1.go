@@ -71,7 +71,7 @@ func (t *Ticket1) Prepare() {
 	tc := t.NewTestcase(0, "You can Use TestCase number 0 for preparation for this ticket.")
 	tc_func := func() models.TestcaseStatus {
 		// enter your testcase function here
-		return tc.Failed()
+		return tc.MustCheck()
 	}
 	tc.SetFunction(tc_func)
 	t.AddTestcase(tc)

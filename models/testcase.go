@@ -23,7 +23,7 @@ type logEntry struct {
 	Timestamp  string    `json:"timestamp"`
 	Level      string    `json:"level"`
 	TicketNo   uint      `json:"ticketNo,omitempty"`
-	TestcaseNo uint      `json:"testcase_no,omitempty"`
+	TestcaseNo uint      `json:"testcase_no"`
 	Action     LogAction `json:"action"`
 	Message    string    `json:"message"`
 }

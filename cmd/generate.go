@@ -100,18 +100,20 @@ func (t *Ticket{{.TicketNum}}) Prepare() {
 	t.SetTicketNo({{.TicketNum}})
 	t.SetTicketDescription("Enter your ticket description here.")
 
+	// !!! Don't put any codes here. Preparation should be done in Testcase 0 !!!
+
 	// TESTCASE 0
 	tc := t.NewTestcase(0, "You can Use TestCase number 0 for preparation for this ticket.")
 	tc_func := func() models.TestcaseStatus {
 		// enter your testcase function here
-		return tc.Failed()
+		return tc.MustCheck()
 	}
 	tc.SetFunction(tc_func)
 	t.AddTestcase(tc)
 
 	// TESTCASE 1
-	tc := t.NewTestcase(1, "Enter your test case description here.")
-	tc_func := func() models.TestcaseStatus {
+	tc = t.NewTestcase(1, "Enter your test case description here.")
+	tc_func = func() models.TestcaseStatus {
 		// enter your testcase function here
 		return tc.Passed()
 	}
@@ -153,4 +155,61 @@ func generateTicket(num int) {
 	}
 
 	fmt.Printf("Generated %s\n", filename)
+
+	// auto-register the new ticket in cmd/root.go init()
+	if err := registerTicketInRoot(num); err != nil {
+		fmt.Printf("Warning: could not auto-register ticket in root.go: %v\n", err)
+	}
+}
+
+// registerTicketInRoot inserts the append line for the new ticket into root.go's init().
+func registerTicketInRoot(num int) error {
+	rootFile := filepath.Join("cmd", "root.go")
+	data, err := os.ReadFile(rootFile)
+	if err != nil {
+		return err
+	}
+
+	insertLine := fmt.Sprintf("\tts = append(ts, new(tickets.Ticket%d))", num)
+	content := string(data)
+
+	// find the last occurrence of "ts = append(ts," and insert after that line
+	lastAppend := lastIndexOf(content, "ts = append(ts,")
+	if lastAppend < 0 {
+		// fallback: insert after the comment anchor
+		anchor := "// Add your tickets here"
+		lastAppend = indexOf(content, anchor) + len(anchor)
+	} else {
+		// advance to end of that line
+		for lastAppend < len(content) && content[lastAppend] != '\n' {
+			lastAppend++
+		}
+	}
+
+	updated := content[:lastAppend] + "\n" + insertLine + content[lastAppend:]
+	if err := os.WriteFile(rootFile, []byte(updated), 0644); err != nil {
+		return err
+	}
+
+	fmt.Printf("Registered Ticket%d in %s\n", num, rootFile)
+	return nil
+}
+
+func indexOf(s, substr string) int {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return i
+		}
+	}
+	return -1
+}
+
+func lastIndexOf(s, substr string) int {
+	last := -1
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			last = i
+		}
+	}
+	return last
 }
