@@ -13,9 +13,9 @@ import (
 )
 
 type ZabbixPsql struct {
-	DBUsername, DBPassword, DBName, DBDnsName, DBPort, DBContainerIp string
-	ServerHost, ServerMappedPort, ServerDnsName, ServerPort          string
-	NetworkName                                                      string
+	DBUsername, DBPassword, DBName, DBDnsName, DBPort       string
+	ServerHost, ServerMappedPort, ServerDnsName, ServerPort string
+	NetworkName                                             string
 }
 
 func NewZabbixPsql(ctx context.Context) (Zabbix, error) {
