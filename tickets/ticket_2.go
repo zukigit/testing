@@ -65,13 +65,12 @@ func (t *Ticket2) Prepare() {
 		ctx := context.WithoutCancel(context.Background())
 		defer ctx.Done()
 
-		zabbix, err := zabbix.NewZabbix(ctx)
+		_, err := zabbix.NewZabbix(ctx)
 		if err != nil {
 			tc.ErrorLog("failed to get zabbix, err: %s", err.Error())
 			return tc.Failed()
 		}
 
-		tc.InfoLog("DB Host: %s, DB Port: %s, DB Name: %s, DB Username: %s, DB Password: %s", zabbix.DBHost, zabbix.MappedPort, zabbix.DBName, zabbix.DBUsername, zabbix.DBPassword)
 		return tc.Passed()
 	}
 	tc.SetFunction(tc_func)
