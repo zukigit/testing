@@ -64,7 +64,6 @@ func (t *Ticket1) GetTestcases() []models.TestCase {
 func (t *Ticket1) Prepare() {
 	t.SetTicketNo(1)
 	t.SetTicketDescription("Enter your ticket description here.")
-	t.SetContext(context.Background())
 
 	// TESTCASE 1
 	tc := t.NewTestcase(1, "Enter your test case description here.")

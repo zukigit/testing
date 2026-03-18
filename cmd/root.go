@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,7 +12,6 @@ import (
 )
 
 var ts []models.Ticket
-var tcs []models.TestCase
 var failedTcs map[uint]uint
 
 func checkDuplicatesAndPrepare() {
@@ -34,19 +34,23 @@ func checkDuplicatesAndPrepare() {
 	}
 }
 
-func collectTcs() {
-	for _, ticket := range ts {
-		tcs = append(tcs, ticket.GetTestcases()...)
-	}
-}
+// runTicket runs all (or a specific) testcase(s) for a ticket.
+// It creates a fresh context for the ticket, cancels it when done,
+// filterTcNo == 0 means run all testcases of the ticket.
+func runTicket(ticket models.Ticket, filterTcNo uint) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-func runTcs() {
-	failedCount := 0
-	failedTcs = make(map[uint]uint)
+	ticket.SetContext(ctx)
 
-	for _, testcase := range tcs {
+	for _, testcase := range ticket.GetTestcases() {
+		if filterTcNo > 0 && testcase.GetTestcaseNo() != filterTcNo {
+			continue
+		}
+
 		testcase.InfoLog("running")
-		status := testcase.Failed()
+
+		var status models.TestcaseStatus
 		if testcase.IsFunctionNil() {
 			testcase.ErrorLog("testcase function is nil, skipping execution")
 			status = testcase.Failed()
@@ -55,16 +59,22 @@ func runTcs() {
 		}
 
 		if status != testcase.Passed() {
-			failedCount++
 			failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
 		}
 
 		testcase.StatusLog(status)
 	}
+}
 
+func runAllTickets() {
+	for _, ticket := range ts {
+		runTicket(ticket, 0)
+	}
+}
+
+func printResults() {
 	fmt.Println("@@@ FINISHED @@@")
-
-	if failedCount > 0 {
+	if len(failedTcs) > 0 {
 		fmt.Println("Not Passed testcases:")
 		for ticketNo, testcaseNo := range failedTcs {
 			fmt.Printf("TicketNo: %d, TestcaseNo: %d\n", ticketNo, testcaseNo)
@@ -78,10 +88,10 @@ var rootCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		checkDuplicatesAndPrepare()
+		failedTcs = make(map[uint]uint)
 
 		if len(args) >= 1 {
-			ticketNumStr := args[0]
-			ticketNum, err := strconv.Atoi(ticketNumStr)
+			ticketNum, err := strconv.Atoi(args[0])
 			if err != nil || ticketNum <= 0 {
 				fmt.Println("Invalid ticket number. Must be a positive integer.")
 				os.Exit(1)
@@ -89,8 +99,7 @@ var rootCmd = &cobra.Command{
 
 			testcaseNum := 0
 			if len(args) == 2 {
-				testcaseNumStr := args[1]
-				testcaseNumParsed, err := strconv.Atoi(testcaseNumStr)
+				testcaseNumParsed, err := strconv.Atoi(args[1])
 				if err != nil || testcaseNumParsed <= 0 {
 					fmt.Println("Invalid testcase number. Must be a positive integer.")
 					os.Exit(1)
@@ -104,10 +113,10 @@ var rootCmd = &cobra.Command{
 					foundTicket = true
 
 					if testcaseNum > 0 {
+						// validate that the testcase exists before running
 						var foundTestcase bool
 						for _, tc := range ticket.GetTestcases() {
 							if tc.GetTestcaseNo() == uint(testcaseNum) {
-								tcs = append(tcs, tc)
 								foundTestcase = true
 								break
 							}
@@ -116,9 +125,9 @@ var rootCmd = &cobra.Command{
 							fmt.Printf("Testcase %d not found in Ticket %d\n", testcaseNum, ticketNum)
 							os.Exit(1)
 						}
-					} else {
-						tcs = ticket.GetTestcases()
 					}
+
+					runTicket(ticket, uint(testcaseNum))
 					break
 				}
 			}
@@ -128,9 +137,10 @@ var rootCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		} else {
-			collectTcs()
+			runAllTickets()
 		}
-		runTcs()
+
+		printResults()
 	},
 }
 
