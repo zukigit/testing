@@ -52,15 +52,13 @@ func (t *Ticket1) GetTestcases() []models.TestCase {
 func (t *Ticket1) Prepare() {
 	t.SetTicketNo(1)
 	t.SetTicketDescription("Enter your ticket description here.")
+	t.SetContext(context.Background())
 
 	// TESTCASE 1
 	tc := t.NewTestcase(1, "Enter your test case description here.")
 	tc_func := func() models.TestcaseStatus {
-		//Enter your testcase function here
-
-		//You can log as follow
-		tc.ErrorLog("it is just example")
-		return tc.Failed() // or tc.Passed() or tc.MustCheck()
+		// enter your testcase function here
+		return tc.Passed()
 	}
 	tc.SetFunction(tc_func)
 	t.AddTestcase(tc)

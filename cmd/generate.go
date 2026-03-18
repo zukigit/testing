@@ -34,12 +34,25 @@ func init() {
 
 const ticketTemplate = `package tickets
 
-import "github.com/zukigit/testing/models"
+import (
+	"context"
+
+	"github.com/zukigit/testing/models"
+)
 
 type Ticket{{.TicketNum}} struct {
-	TicketNo                                   uint
-	TicketDescription                          string
-	Testcases                                   []models.TestCase
+	TicketNo          uint
+	TicketDescription string
+	Testcases         []models.TestCase
+	context           context.Context
+}
+
+func (t *Ticket{{.TicketNum}}) SetContext(ctx context.Context) {
+	t.context = ctx
+}
+
+func (t *Ticket{{.TicketNum}}) GetContext() context.Context {
+	return t.context
 }
 
 func (t *Ticket{{.TicketNum}}) NewTestcase(testcaseNo uint, testcaseDescription string) *models.TestCase {
@@ -73,15 +86,13 @@ func (t *Ticket{{.TicketNum}}) GetTestcases() []models.TestCase {
 func (t *Ticket{{.TicketNum}}) Prepare() {
 	t.SetTicketNo({{.TicketNum}})
 	t.SetTicketDescription("Enter your ticket description here.")
+	t.SetContext(context.Background())
 
 	// TESTCASE 1
 	tc := t.NewTestcase(1, "Enter your test case description here.")
 	tc_func := func() models.TestcaseStatus {
-		//Enter your testcase function here
-
-		//You can log as follow
-		tc.ErrorLog("it is just example")
-		return tc.Failed() // or tc.Passed() or tc.MustCheck()
+		// enter your testcase function here
+		return tc.Passed()
 	}
 	tc.SetFunction(tc_func)
 	t.AddTestcase(tc)
