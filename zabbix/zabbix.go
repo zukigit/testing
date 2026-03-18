@@ -9,8 +9,21 @@ import (
 )
 
 type Zabbix interface {
-	GetServerHost() string
-	GetServerPort() string
+	// DB
+	GetDBUsername() string
+	GetDBPassword() string
+	GetDBName() string
+	GetDBDnsName() string // only for docker internal communication
+	GetDBPort() string    // only for docker internal communication
+
+	// server
+	GetServerHost() string       // it can be used in testcases
+	GetServerMappedPort() string // it can be used in testcases
+	GetServerDnsName() string    // only for docker internal communication
+	GetServerPort() string       // only for docker internal communication
+
+	// network
+	GetNetworkName() string
 }
 
 func NewZabbix(ctx context.Context) (Zabbix, error) {

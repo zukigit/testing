@@ -119,12 +119,11 @@ func (z *ZabbixPsql) getZabbixServerContainer(ctx context.Context) (testcontaine
 	return container, nil
 }
 
-func (z *ZabbixPsql) GetDBUsername() string    { return z.DBUsername }
-func (z *ZabbixPsql) GetDBPassword() string    { return z.DBPassword }
-func (z *ZabbixPsql) GetDBName() string        { return z.DBName }
-func (z *ZabbixPsql) GetDBDnsName() string     { return z.DBDnsName }
-func (z *ZabbixPsql) GetDBPort() string        { return z.DBPort }
-func (z *ZabbixPsql) GetDBContainerIp() string { return z.DBContainerIp }
+func (z *ZabbixPsql) GetDBUsername() string { return z.DBUsername }
+func (z *ZabbixPsql) GetDBPassword() string { return z.DBPassword }
+func (z *ZabbixPsql) GetDBName() string     { return z.DBName }
+func (z *ZabbixPsql) GetDBDnsName() string  { return z.DBDnsName }
+func (z *ZabbixPsql) GetDBPort() string     { return z.DBPort }
 
 func (z *ZabbixPsql) GetServerHost() string       { return z.ServerHost }
 func (z *ZabbixPsql) GetServerMappedPort() string { return z.ServerMappedPort }
