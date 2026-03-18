@@ -80,7 +80,7 @@ func (t *TestCase) Run_function() TestcaseStatus {
 	return t.function()
 }
 
-func (t *TestCase) Is_function_nil() bool {
+func (t *TestCase) IsFunctionNil() bool {
 	return t.function == nil
 }
 

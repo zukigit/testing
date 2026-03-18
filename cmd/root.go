@@ -22,7 +22,7 @@ func runTcs() {
 	failedCount := 0
 	for _, testcase := range tcs {
 		testcase.InfoLog("running")
-		if testcase.Is_function_nil() {
+		if testcase.IsFunctionNil() {
 			testcase.ErrorLog("testcase function is nil, skipping execution")
 			testcase.SetStatus(models.FAILED)
 			failedCount++
