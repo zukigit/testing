@@ -65,9 +65,20 @@ func (t *Ticket1) Prepare() {
 	t.SetTicketNo(1)
 	t.SetTicketDescription("Enter your ticket description here.")
 
-	// TESTCASE 1
-	tc := t.NewTestcase(1, "Enter your test case description here.")
+	// !!! Don't put any codes here. Preparation should be done in Testcase 0 !!!
+
+	// TESTCASE 0
+	tc := t.NewTestcase(0, "You can Use TestCase number 0 for preparation for this ticket.")
 	tc_func := func() models.TestcaseStatus {
+		// enter your testcase function here
+		return tc.Failed()
+	}
+	tc.SetFunction(tc_func)
+	t.AddTestcase(tc)
+
+	// TESTCASE 1
+	tc = t.NewTestcase(1, "Enter your test case description here.")
+	tc_func = func() models.TestcaseStatus {
 		// enter your testcase function here
 		return tc.Passed()
 	}

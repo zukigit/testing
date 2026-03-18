@@ -100,6 +100,15 @@ func (t *Ticket{{.TicketNum}}) Prepare() {
 	t.SetTicketNo({{.TicketNum}})
 	t.SetTicketDescription("Enter your ticket description here.")
 
+	// TESTCASE 0
+	tc := t.NewTestcase(0, "You can Use TestCase number 0 for preparation for this ticket.")
+	tc_func := func() models.TestcaseStatus {
+		// enter your testcase function here
+		return tc.Failed()
+	}
+	tc.SetFunction(tc_func)
+	t.AddTestcase(tc)
+
 	// TESTCASE 1
 	tc := t.NewTestcase(1, "Enter your test case description here.")
 	tc_func := func() models.TestcaseStatus {

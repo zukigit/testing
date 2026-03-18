@@ -34,35 +34,53 @@ func checkDuplicatesAndPrepare() {
 	}
 }
 
+// runTestcase executes a single testcase and records the result.
+func runTestcase(testcase models.TestCase) {
+	testcase.InfoLog("running")
+
+	var status models.TestcaseStatus
+	if testcase.IsFunctionNil() {
+		testcase.ErrorLog("testcase function is nil, skipping execution")
+		status = testcase.Failed()
+	} else {
+		status = testcase.RunFunction()
+	}
+
+	if status != testcase.Passed() {
+		failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
+	}
+
+	testcase.StatusLog(status)
+}
+
 // runTicket runs all (or a specific) testcase(s) for a ticket.
-// It creates a fresh context for the ticket, cancels it when done,
-// filterTcNo == 0 means run all testcases of the ticket.
+// It creates a fresh context for the ticket, cancels it when done.
+// Testcase 0 is treated as a preparation step and always runs first.
+// filterTcNo == 0 means run all testcases (except testcase 0, which already ran).
 func runTicket(ticket models.Ticket, filterTcNo uint) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	ticket.SetContext(ctx)
 
+	// always run testcase 0 first as preparation, if it exists
 	for _, testcase := range ticket.GetTestcases() {
+		if testcase.GetTestcaseNo() == 0 {
+			testcase.InfoLog("running preparation")
+			runTestcase(testcase)
+			break
+		}
+	}
+
+	// run the remaining testcases (skip testcase 0, it already ran)
+	for _, testcase := range ticket.GetTestcases() {
+		if testcase.GetTestcaseNo() == 0 {
+			continue
+		}
 		if filterTcNo > 0 && testcase.GetTestcaseNo() != filterTcNo {
 			continue
 		}
-
-		testcase.InfoLog("running")
-
-		var status models.TestcaseStatus
-		if testcase.IsFunctionNil() {
-			testcase.ErrorLog("testcase function is nil, skipping execution")
-			status = testcase.Failed()
-		} else {
-			status = testcase.RunFunction()
-		}
-
-		if status != testcase.Passed() {
-			failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
-		}
-
-		testcase.StatusLog(status)
+		runTestcase(testcase)
 	}
 }
 
