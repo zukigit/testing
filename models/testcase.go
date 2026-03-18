@@ -34,7 +34,7 @@ type TestCase struct {
 	stderrLogger         *log.Logger
 }
 
-func New_testcase(testcase_id uint, testcase_description string) *TestCase {
+func NewTestcase(testcase_id uint, testcase_description string) *TestCase {
 
 	return &TestCase{
 		Testcase_no:          testcase_id,
@@ -52,7 +52,7 @@ func (t *TestCase) Get_ticket_no() uint {
 	return t.ticket_no
 }
 
-func (t *TestCase) Set_ticket_no(ticket_no uint) {
+func (t *TestCase) SetTicketNo(ticket_no uint) {
 	t.ticket_no = ticket_no
 }
 
@@ -60,7 +60,7 @@ func (t *TestCase) Get_ticket_description() string {
 	return t.Testcase_description
 }
 
-func (t *TestCase) Set_status(status TestcaseStatus) {
+func (t *TestCase) SetStatus(status TestcaseStatus) {
 	t.Testcase_status = status
 }
 
@@ -68,11 +68,11 @@ func (t *TestCase) Set_duration(duration time.Duration) {
 	t.Duration = duration
 }
 
-func (t *TestCase) Get_status() TestcaseStatus {
+func (t *TestCase) GetStatus() TestcaseStatus {
 	return t.Testcase_status
 }
 
-func (t *TestCase) Set_function(function func() TestcaseStatus) {
+func (t *TestCase) SetFunction(function func() TestcaseStatus) {
 	t.function = function
 }
 

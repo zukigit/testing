@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/zukigit/testing/models"
@@ -20,22 +19,30 @@ func collectTcs() {
 }
 
 func runTcs() {
+	failedCount := 0
 	for _, testcase := range tcs {
 		testcase.InfoLog("running")
 		if testcase.Is_function_nil() {
 			testcase.ErrorLog("testcase function is nil, skipping execution")
+			testcase.SetStatus(models.FAILED)
+			failedCount++
 		} else {
-			// start time
-			startTime := time.Now()
-
-			testcase.Set_status(testcase.Run_function())
-
-			// total elasped time or duration of testcase
-			duration := time.Since(startTime)
-
-			testcase.Set_duration(duration)
+			status := testcase.Run_function()
+			if status != testcase.Passed() {
+				failedCount++
+			}
+			testcase.SetStatus(status)
 		}
-		// lib.InfoLog.Println("done running!")
+
+		testcase.InfoLog(string(testcase.GetStatus()))
+	}
+
+	if failedCount > 0 {
+		for _, testcase := range tcs {
+			if testcase.GetStatus() != testcase.Passed() {
+				testcase.InfoLog(string(testcase.GetStatus()))
+			}
+		}
 	}
 }
 

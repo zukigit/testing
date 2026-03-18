@@ -43,15 +43,15 @@ type Ticket{{.TicketNum}} struct {
 	Testcases                                   []models.TestCase
 }
 
-func (t *Ticket{{.TicketNum}}) New_testcase(testcase_id uint, testcase_description string) *models.TestCase {
-	return models.New_testcase(testcase_id, testcase_description)
+func (t *Ticket{{.TicketNum}}) NewTestcase(testcase_id uint, testcase_description string) *models.TestCase {
+	return models.NewTestcase(testcase_id, testcase_description)
 }
 
 func (t *Ticket{{.TicketNum}}) Get_ticket_no() uint {
 	return t.Ticket_no
 }
 
-func (t *Ticket{{.TicketNum}}) Set_ticket_no(ticket_no uint) {
+func (t *Ticket{{.TicketNum}}) SetTicketNo(ticket_no uint) {
 	t.Ticket_no = ticket_no
 }
 
@@ -71,11 +71,11 @@ func (t *Ticket{{.TicketNum}}) Get_ticket_description() string {
 	return t.Ticket_description
 }
 
-func (t *Ticket{{.TicketNum}}) Set_ticket_description(testcase_description string) {
+func (t *Ticket{{.TicketNum}}) SetTicketDescription(testcase_description string) {
 	t.Ticket_description = testcase_description
 }
 
-func (t *Ticket{{.TicketNum}}) Add_testcase(tc *models.TestCase) {
+func (t *Ticket{{.TicketNum}}) AddTestcase(tc *models.TestCase) {
 	t.Testcases = append(t.Testcases, *tc)
 }
 
@@ -84,17 +84,17 @@ func (t *Ticket{{.TicketNum}}) Get_testcases() []models.TestCase {
 }
 
 func (t *Ticket{{.TicketNum}}) Prepare() {
-	t.Set_ticket_no({{.TicketNum}})
-	t.Set_ticket_description("Enter your ticket description here.")
+	t.SetTicketNo({{.TicketNum}})
+	t.SetTicketDescription("Enter your ticket description here.")
 
 	// TESTCASE 1
-	tc := t.New_testcase(1, "Enter your test case description here.")
+	tc := t.NewTestcase(1, "Enter your test case description here.")
 	tc_func := func() models.TestcaseStatus {
 		//Enter your testcase function here
 		return tc.Failed() // or tc.Passed() or tc.MustCheck()
 	}
-	tc.Set_function(tc_func)
-	t.Add_testcase(tc)
+	tc.SetFunction(tc_func)
+	t.AddTestcase(tc)
 }
 `
 
