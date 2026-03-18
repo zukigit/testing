@@ -18,7 +18,7 @@ func NewZabbix(ctx context.Context) (Zabbix, error) {
 
 	switch models.DBType(dbType) {
 	case models.DBTypeMysql:
-		return NewZabbixMysql(ctx)
+		return nil, nil
 	case models.DBTypePsql:
 		return NewZabbixPsql(ctx)
 	default:
