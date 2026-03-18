@@ -115,8 +115,8 @@ func (t *TestCase) ErrorLog(format string, a ...interface{}) {
 	t.writeLog(t.stderrLogger, "ERROR", OUTPUT, fmt.Sprintf(format, a...))
 }
 
-func (t *TestCase) StatusLog(format string, a ...interface{}) {
-	t.writeLog(t.stdoutLogger, "INFO", STATUS, fmt.Sprintf(format, a...))
+func (t *TestCase) StatusLog(status TestcaseStatus) {
+	t.writeLog(t.stdoutLogger, "INFO", STATUS, string(status))
 }
 
 func (t *TestCase) Failed() TestcaseStatus {

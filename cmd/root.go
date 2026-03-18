@@ -14,9 +14,28 @@ var ts []models.Ticket
 var tcs []models.TestCase
 var failedTcs map[uint]uint
 
-func collectTcs() {
+func checkDuplicatesAndPrepare() {
+	seen := make(map[uint]bool)
+	var hasDuplicates bool
 	for _, ticket := range ts {
 		ticket.Prepare()
+		no := ticket.GetTicketNo()
+		if seen[no] {
+			if !hasDuplicates {
+				fmt.Println("Duplicated ticket numbers found:")
+				hasDuplicates = true
+			}
+			fmt.Printf("- TicketNo: %d\n", no)
+		}
+		seen[no] = true
+	}
+	if hasDuplicates {
+		os.Exit(1)
+	}
+}
+
+func collectTcs() {
+	for _, ticket := range ts {
 		tcs = append(tcs, ticket.Get_testcases()...)
 	}
 }
@@ -40,7 +59,7 @@ func runTcs() {
 			failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
 		}
 
-		testcase.StatusLog(string(status))
+		testcase.StatusLog(status)
 	}
 
 	fmt.Println("@@@ FINISHED @@@")
@@ -58,6 +77,8 @@ var rootCmd = &cobra.Command{
 	Short: "run all tickets, a specific ticket, or a specific testcase",
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
+		checkDuplicatesAndPrepare()
+
 		if len(args) >= 1 {
 			ticketNumStr := args[0]
 			ticketNum, err := strconv.Atoi(ticketNumStr)
@@ -79,7 +100,6 @@ var rootCmd = &cobra.Command{
 
 			var foundTicket bool
 			for _, ticket := range ts {
-				ticket.Prepare()
 				if ticket.GetTicketNo() == uint(ticketNum) {
 					foundTicket = true
 
