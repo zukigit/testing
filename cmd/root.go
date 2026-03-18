@@ -54,11 +54,11 @@ func runTcs() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "testing [ticket number]",
-	Short: "run all tickets or a specific ticket",
-	Args:  cobra.MaximumNArgs(1),
+	Use:   "testing [ticket number] [testcase number]",
+	Short: "run all tickets, a specific ticket, or a specific testcase",
+	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
+		if len(args) >= 1 {
 			ticketNumStr := args[0]
 			ticketNum, err := strconv.Atoi(ticketNumStr)
 			if err != nil || ticketNum <= 0 {
@@ -66,17 +66,44 @@ var rootCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			var found bool
+			testcaseNum := 0
+			if len(args) == 2 {
+				testcaseNumStr := args[1]
+				testcaseNumParsed, err := strconv.Atoi(testcaseNumStr)
+				if err != nil || testcaseNumParsed <= 0 {
+					fmt.Println("Invalid testcase number. Must be a positive integer.")
+					os.Exit(1)
+				}
+				testcaseNum = testcaseNumParsed
+			}
+
+			var foundTicket bool
 			for _, ticket := range ts {
 				ticket.Prepare()
 				if ticket.GetTicketNo() == uint(ticketNum) {
-					tcs = ticket.Get_testcases()
-					found = true
+					foundTicket = true
+
+					if testcaseNum > 0 {
+						var foundTestcase bool
+						for _, tc := range ticket.Get_testcases() {
+							if tc.GetTestcaseNo() == uint(testcaseNum) {
+								tcs = append(tcs, tc)
+								foundTestcase = true
+								break
+							}
+						}
+						if !foundTestcase {
+							fmt.Printf("Testcase %d not found in Ticket %d\n", testcaseNum, ticketNum)
+							os.Exit(1)
+						}
+					} else {
+						tcs = ticket.Get_testcases()
+					}
 					break
 				}
 			}
 
-			if !found {
+			if !foundTicket {
 				fmt.Printf("Ticket %d not found\n", ticketNum)
 				os.Exit(1)
 			}
