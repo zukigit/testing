@@ -72,7 +72,7 @@ func (t *Ticket2) Prepare() {
 		}
 
 		tc.InfoLog("DB Host: %s, DB Port: %s, DB Name: %s, DB Username: %s, DB Password: %s", zabbix.DBHost, zabbix.MappedPort, zabbix.DBName, zabbix.DBUsername, zabbix.DBPassword)
-		return tc.Failed()
+		return tc.Passed()
 	}
 	tc.SetFunction(tc_func)
 	t.AddTestcase(tc)

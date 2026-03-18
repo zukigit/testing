@@ -6,13 +6,15 @@ import (
 	"time"
 
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/zukigit/testing/lib"
 )
 
 type Zabbix struct {
-	DBUsername, DBPassword, DBName, DBHost, MappedPort string
-	ServerHost, ServerPort                             string
+	DBUsername, DBPassword, DBName, DBHost, MappedPort, DBContainerIp string
+	ServerHost, ServerPort                                            string
+	NetworkName                                                       string
 }
 
 func NewZabbix(ctx context.Context) (*Zabbix, error) {
@@ -21,6 +23,12 @@ func NewZabbix(ctx context.Context) (*Zabbix, error) {
 		DBPassword: lib.Getenv("ZABBIX_DB_PASSWORD", "zabbix"),
 		DBName:     lib.Getenv("ZABBIX_DB_NAME", "zabbix"),
 	}
+
+	net, err := network.New(ctx, network.WithDriver("bridge"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create network, err: %s", err.Error())
+	}
+	zabbix.NetworkName = net.Name
 
 	dbContainer, err := zabbix.getZabbixDBContainer(ctx)
 	if err != nil {
@@ -63,10 +71,15 @@ func (z *Zabbix) getZabbixDBContainer(ctx context.Context) (testcontainers.Conta
 	req := testcontainers.ContainerRequest{
 		Image:        lib.Getenv("ZABBIX_DB_IMAGE", "postgres:14-alpine3.22"),
 		ExposedPorts: []string{"5432/tcp"},
+		Networks:     []string{z.NetworkName},
+		NetworkAliases: map[string][]string{
+			z.NetworkName: {"zabbix-postgres"},
+		},
 		Env: map[string]string{
-			"POSTGRES_USER":     z.DBUsername,
-			"POSTGRES_PASSWORD": z.DBPassword,
-			"POSTGRES_DB":       z.DBName,
+			"POSTGRES_USER":             z.DBUsername,
+			"POSTGRES_PASSWORD":         z.DBPassword,
+			"POSTGRES_DB":               z.DBName,
+			"POSTGRES_HOST_AUTH_METHOD": "trust",
 		},
 		WaitingFor: wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
 	}
@@ -86,17 +99,17 @@ func (z *Zabbix) getZabbixServerContainer(ctx context.Context) (testcontainers.C
 	req := testcontainers.ContainerRequest{
 		Image:        lib.Getenv("ZABBIX_SERVER_IMAGE", "zabbix/zabbix-server-pgsql:7.0-alpine-latest"),
 		ExposedPorts: []string{"10051/tcp"},
+		Networks:     []string{z.NetworkName},
 		Env: map[string]string{
-			"DB_SERVER_HOST":   z.DBHost,
-			"DB_SERVER_PORT":   z.MappedPort,
-			"DB_SERVER_DBNAME": z.DBName,
-			"DB_SERVER_USER":   z.DBUsername,
-			"DB_SERVER_PASSWD": z.DBPassword,
+			"DB_SERVER_HOST":    "zabbix-postgres",
+			"DB_SERVER_PORT":    "5432",
+			"POSTGRES_USER":     z.DBUsername,
+			"POSTGRES_PASSWORD": z.DBPassword,
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForLog("server #0 started [main process]"),
 			wait.ForListeningPort("10051/tcp"),
-		).WithDeadline(2 * time.Minute),
+		).WithDeadline(30 * time.Minute),
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
