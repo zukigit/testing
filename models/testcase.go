@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -106,16 +107,16 @@ func (t *TestCase) writeLog(logger *log.Logger, level string, action LogAction, 
 	logger.Println(string(data))
 }
 
-func (t *TestCase) InfoLog(msg string) {
-	t.writeLog(t.stdoutLogger, "INFO", OUTPUT, msg)
+func (t *TestCase) InfoLog(format string, a ...interface{}) {
+	t.writeLog(t.stdoutLogger, "INFO", OUTPUT, fmt.Sprintf(format, a...))
 }
 
-func (t *TestCase) ErrorLog(msg string) {
-	t.writeLog(t.stderrLogger, "ERROR", OUTPUT, msg)
+func (t *TestCase) ErrorLog(format string, a ...interface{}) {
+	t.writeLog(t.stderrLogger, "ERROR", OUTPUT, fmt.Sprintf(format, a...))
 }
 
-func (t *TestCase) StatusLog(msg string) {
-	t.writeLog(t.stdoutLogger, "INFO", STATUS, msg)
+func (t *TestCase) StatusLog(format string, a ...interface{}) {
+	t.writeLog(t.stdoutLogger, "INFO", STATUS, fmt.Sprintf(format, a...))
 }
 
 func (t *TestCase) Failed() TestcaseStatus {

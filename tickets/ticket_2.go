@@ -2,7 +2,6 @@ package tickets
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
@@ -68,11 +67,11 @@ func (t *Ticket2) Prepare() {
 
 		zabbix, err := zabbix.NewZabbix(ctx)
 		if err != nil {
-			tc.ErrorLog(fmt.Sprintf("failed to get zabbix, err: %s", err.Error()))
+			tc.ErrorLog("failed to get zabbix, err: %s", err.Error())
 			return tc.Failed()
 		}
 
-		tc.InfoLog(fmt.Sprintf("DB Host: %s, DB Port: %s, DB Name: %s, DB Username: %s, DB Password: %s", zabbix.DBHost, zabbix.MappedPort, zabbix.DBName, zabbix.DBUsername, zabbix.DBPassword))
+		tc.InfoLog("DB Host: %s, DB Port: %s, DB Name: %s, DB Username: %s, DB Password: %s", zabbix.DBHost, zabbix.MappedPort, zabbix.DBName, zabbix.DBUsername, zabbix.DBPassword)
 		return tc.Failed()
 	}
 	tc.SetFunction(tc_func)
