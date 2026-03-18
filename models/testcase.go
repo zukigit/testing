@@ -8,19 +8,23 @@ import (
 )
 
 type TestcaseStatus string
+type LogAction string
 
 const (
 	PASSED     TestcaseStatus = "PASSED"
 	FAILED     TestcaseStatus = "FAILED"
 	MUST_CHECK TestcaseStatus = "MUST_CHECK"
+	OUTPUT     LogAction      = "OUTPUT"
+	STATUS     LogAction      = "STATUS"
 )
 
 type logEntry struct {
-	Timestamp  string `json:"timestamp"`
-	Level      string `json:"level"`
-	TicketNo   uint   `json:"ticket_no,omitempty"`
-	TestcaseNo uint   `json:"testcase_no,omitempty"`
-	Message    string `json:"message"`
+	Timestamp  string    `json:"timestamp"`
+	Level      string    `json:"level"`
+	TicketNo   uint      `json:"ticket_no,omitempty"`
+	TestcaseNo uint      `json:"testcase_no,omitempty"`
+	Action     LogAction `json:"action"`
+	Message    string    `json:"message"`
 }
 
 type TestCase struct {
@@ -85,10 +89,11 @@ func (t *TestCase) IsFunctionNil() bool {
 	return t.function == nil
 }
 
-func (t *TestCase) writeLog(logger *log.Logger, level, msg string) {
+func (t *TestCase) writeLog(logger *log.Logger, level string, action LogAction, msg string) {
 	entry := logEntry{
 		Timestamp:  time.Now().Format(time.RFC3339),
 		Level:      level,
+		Action:     action,
 		TicketNo:   t.Ticket_no,
 		TestcaseNo: t.Testcase_no,
 		Message:    msg,
@@ -102,11 +107,15 @@ func (t *TestCase) writeLog(logger *log.Logger, level, msg string) {
 }
 
 func (t *TestCase) InfoLog(msg string) {
-	t.writeLog(t.stdoutLogger, "INFO", msg)
+	t.writeLog(t.stdoutLogger, "INFO", OUTPUT, msg)
 }
 
 func (t *TestCase) ErrorLog(msg string) {
-	t.writeLog(t.stderrLogger, "ERROR", msg)
+	t.writeLog(t.stderrLogger, "ERROR", OUTPUT, msg)
+}
+
+func (t *TestCase) StatusLog(msg string) {
+	t.writeLog(t.stdoutLogger, "INFO", STATUS, msg)
 }
 
 func (t *TestCase) Failed() TestcaseStatus {

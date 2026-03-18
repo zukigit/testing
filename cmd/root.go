@@ -40,7 +40,7 @@ func runTcs() {
 			failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
 		}
 
-		testcase.InfoLog(string(status))
+		testcase.StatusLog(string(status))
 	}
 
 	fmt.Println("@@@ FINISHED @@@")
