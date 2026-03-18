@@ -36,7 +36,7 @@ func checkDuplicatesAndPrepare() {
 
 func collectTcs() {
 	for _, ticket := range ts {
-		tcs = append(tcs, ticket.Get_testcases()...)
+		tcs = append(tcs, ticket.GetTestcases()...)
 	}
 }
 
@@ -105,7 +105,7 @@ var rootCmd = &cobra.Command{
 
 					if testcaseNum > 0 {
 						var foundTestcase bool
-						for _, tc := range ticket.Get_testcases() {
+						for _, tc := range ticket.GetTestcases() {
 							if tc.GetTestcaseNo() == uint(testcaseNum) {
 								tcs = append(tcs, tc)
 								foundTestcase = true
@@ -117,7 +117,7 @@ var rootCmd = &cobra.Command{
 							os.Exit(1)
 						}
 					} else {
-						tcs = ticket.Get_testcases()
+						tcs = ticket.GetTestcases()
 					}
 					break
 				}

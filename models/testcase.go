@@ -22,7 +22,7 @@ const (
 type logEntry struct {
 	Timestamp  string    `json:"timestamp"`
 	Level      string    `json:"level"`
-	TicketNo   uint      `json:"ticket_no,omitempty"`
+	TicketNo   uint      `json:"ticketNo,omitempty"`
 	TestcaseNo uint      `json:"testcase_no,omitempty"`
 	Action     LogAction `json:"action"`
 	Message    string    `json:"message"`
@@ -39,12 +39,12 @@ type TestCase struct {
 	stderrLogger         *log.Logger
 }
 
-func NewTestcase(ticketNo, testcaseNo uint, testcase_description string) *TestCase {
+func NewTestcase(ticketNo, testcaseNo uint, testcaseDescription string) *TestCase {
 
 	return &TestCase{
 		Ticket_no:            ticketNo,
 		Testcase_no:          testcaseNo,
-		Testcase_description: testcase_description,
+		Testcase_description: testcaseDescription,
 		stdoutLogger:         log.New(os.Stdout, "", 0),
 		stderrLogger:         log.New(os.Stderr, "", 0),
 	}
@@ -58,11 +58,11 @@ func (t *TestCase) GetTicketNo() uint {
 	return t.Ticket_no
 }
 
-func (t *TestCase) SetTicketNo(ticket_no uint) {
-	t.Ticket_no = ticket_no
+func (t *TestCase) SetTicketNo(ticketNo uint) {
+	t.Ticket_no = ticketNo
 }
 
-func (t *TestCase) Get_ticket_description() string {
+func (t *TestCase) GetTicketDescription() string {
 	return t.Testcase_description
 }
 

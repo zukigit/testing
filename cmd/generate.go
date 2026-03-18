@@ -43,43 +43,31 @@ type Ticket{{.TicketNum}} struct {
 	Testcases                                   []models.TestCase
 }
 
-func (t *Ticket{{.TicketNum}}) NewTestcase(testcaseNo uint, testcase_description string) *models.TestCase {
-	return models.NewTestcase(t.Ticket_no, testcaseNo, testcase_description)
+func (t *Ticket{{.TicketNum}}) NewTestcase(testcaseNo uint, testcaseDescription string) *models.TestCase {
+	return models.NewTestcase(t.Ticket_no, testcaseNo, testcaseDescription)
 }
 
 func (t *Ticket{{.TicketNum}}) GetTicketNo() uint {
 	return t.Ticket_no
 }
 
-func (t *Ticket{{.TicketNum}}) SetTicketNo(ticket_no uint) {
-	t.Ticket_no = ticket_no
+func (t *Ticket{{.TicketNum}}) SetTicketNo(ticketNo uint) {
+	t.Ticket_no = ticketNo
 }
 
-func (t *Ticket{{.TicketNum}}) Set_PASSED_count(passed_count int) {
-	t.PASSED_count = passed_count
-}
-
-func (t *Ticket{{.TicketNum}}) Set_FAILED_count(failed_count int) {
-	t.FAILED_count = failed_count
-}
-
-func (t *Ticket{{.TicketNum}}) Set_MUSTCHECK_count(mustcheck_count int) {
-	t.MUSTCHECK_count = mustcheck_count
-}
-
-func (t *Ticket{{.TicketNum}}) Get_ticket_description() string {
+func (t *Ticket{{.TicketNum}}) GetTicketDescription() string {
 	return t.Ticket_description
 }
 
-func (t *Ticket{{.TicketNum}}) SetTicketDescription(testcase_description string) {
-	t.Ticket_description = testcase_description
+func (t *Ticket{{.TicketNum}}) SetTicketDescription(testcaseDescription string) {
+	t.Ticket_description = testcaseDescription
 }
 
 func (t *Ticket{{.TicketNum}}) AddTestcase(tc *models.TestCase) {
 	t.Testcases = append(t.Testcases, *tc)
 }
 
-func (t *Ticket{{.TicketNum}}) Get_testcases() []models.TestCase {
+func (t *Ticket{{.TicketNum}}) GetTestcases() []models.TestCase {
 	return t.Testcases
 }
 
