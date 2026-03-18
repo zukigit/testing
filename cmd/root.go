@@ -12,7 +12,8 @@ import (
 )
 
 var ts []models.Ticket
-var failedTcs map[uint]uint
+var failedTcs map[uint][]uint
+var skippedTickets []uint
 
 func checkDuplicatesAndPrepare() {
 	seen := make(map[uint]bool)
@@ -34,8 +35,8 @@ func checkDuplicatesAndPrepare() {
 	}
 }
 
-// runTestcase executes a single testcase and records the result.
-func runTestcase(testcase models.TestCase) {
+// runTestcase executes a single testcase, records any failure, and returns the status.
+func runTestcase(testcase models.TestCase) models.TestcaseStatus {
 	testcase.InfoLog("running")
 
 	var status models.TestcaseStatus
@@ -47,15 +48,18 @@ func runTestcase(testcase models.TestCase) {
 	}
 
 	if status != testcase.Passed() {
-		failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
+		ticketNo := testcase.GetTicketNo()
+		failedTcs[ticketNo] = append(failedTcs[ticketNo], testcase.GetTestcaseNo())
 	}
 
 	testcase.StatusLog(status)
+	return status
 }
 
 // runTicket runs all (or a specific) testcase(s) for a ticket.
 // It creates a fresh context for the ticket, cancels it when done.
 // Testcase 0 is treated as a preparation step and always runs first.
+// If TC0 returns FAILED, the entire ticket is skipped and logged.
 // filterTcNo == 0 means run all testcases (except testcase 0, which already ran).
 func runTicket(ticket models.Ticket, filterTcNo uint) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -67,7 +71,11 @@ func runTicket(ticket models.Ticket, filterTcNo uint) {
 	for _, testcase := range ticket.GetTestcases() {
 		if testcase.GetTestcaseNo() == 0 {
 			testcase.InfoLog("running preparation")
-			runTestcase(testcase)
+			if status := runTestcase(testcase); status == testcase.Failed() {
+				testcase.ErrorLog("preparation failed — skipping entire ticket %d", ticket.GetTicketNo())
+				skippedTickets = append(skippedTickets, ticket.GetTicketNo())
+				return
+			}
 			break
 		}
 	}
@@ -92,10 +100,18 @@ func runAllTickets() {
 
 func printResults() {
 	fmt.Println("@@@ FINISHED @@@")
+	if len(skippedTickets) > 0 {
+		fmt.Println("Skipped tickets (preparation failed):")
+		for _, ticketNo := range skippedTickets {
+			fmt.Printf("- TicketNo: %d\n", ticketNo)
+		}
+	}
 	if len(failedTcs) > 0 {
 		fmt.Println("Not Passed testcases:")
-		for ticketNo, testcaseNo := range failedTcs {
-			fmt.Printf("TicketNo: %d, TestcaseNo: %d\n", ticketNo, testcaseNo)
+		for ticketNo, testcaseNos := range failedTcs {
+			for _, testcaseNo := range testcaseNos {
+				fmt.Printf("TicketNo: %d, TestcaseNo: %d\n", ticketNo, testcaseNo)
+			}
 		}
 	}
 }
@@ -106,7 +122,8 @@ var rootCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		checkDuplicatesAndPrepare()
-		failedTcs = make(map[uint]uint)
+		failedTcs = make(map[uint][]uint)
+		skippedTickets = nil
 
 		if len(args) >= 1 {
 			ticketNum, err := strconv.Atoi(args[0])
