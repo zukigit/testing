@@ -34,7 +34,7 @@ type TestCase struct {
 	Testcase_status      TestcaseStatus
 	Duration             time.Duration
 	function             func() TestcaseStatus
-	Ticket_no            uint
+	TicketNo             uint
 	stdoutLogger         *log.Logger
 	stderrLogger         *log.Logger
 }
@@ -42,7 +42,7 @@ type TestCase struct {
 func NewTestcase(ticketNo, testcaseNo uint, testcaseDescription string) *TestCase {
 
 	return &TestCase{
-		Ticket_no:            ticketNo,
+		TicketNo:             ticketNo,
 		Testcase_no:          testcaseNo,
 		Testcase_description: testcaseDescription,
 		stdoutLogger:         log.New(os.Stdout, "", 0),
@@ -55,11 +55,11 @@ func (t *TestCase) GetTestcaseNo() uint {
 }
 
 func (t *TestCase) GetTicketNo() uint {
-	return t.Ticket_no
+	return t.TicketNo
 }
 
 func (t *TestCase) SetTicketNo(ticketNo uint) {
-	t.Ticket_no = ticketNo
+	t.TicketNo = ticketNo
 }
 
 func (t *TestCase) GetTicketDescription() string {
@@ -95,7 +95,7 @@ func (t *TestCase) writeLog(logger *log.Logger, level string, action LogAction, 
 		Timestamp:  time.Now().Format(time.RFC3339),
 		Level:      level,
 		Action:     action,
-		TicketNo:   t.Ticket_no,
+		TicketNo:   t.TicketNo,
 		TestcaseNo: t.Testcase_no,
 		Message:    msg,
 	}

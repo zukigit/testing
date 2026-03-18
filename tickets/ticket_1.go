@@ -1,32 +1,44 @@
 package tickets
 
-import "github.com/zukigit/testing/models"
+import (
+	"context"
+
+	"github.com/zukigit/testing/models"
+)
 
 type Ticket1 struct {
-	Ticket_no                                   uint
-	Ticket_description                          string
-	PASSED_count, FAILED_count, MUSTCHECK_count int
-	Testcases                                   []models.TestCase
+	TicketNo          uint
+	TicketDescription string
+	Testcases         []models.TestCase
+	context           context.Context
+}
+
+func (t *Ticket1) SetContext(ctx context.Context) {
+	t.context = ctx
+}
+
+func (t *Ticket1) GetContext() context.Context {
+	return t.context
 }
 
 func (t *Ticket1) NewTestcase(testcaseNo uint, testcaseDescription string) *models.TestCase {
-	return models.NewTestcase(t.Ticket_no, testcaseNo, testcaseDescription)
+	return models.NewTestcase(t.TicketNo, testcaseNo, testcaseDescription)
 }
 
 func (t *Ticket1) GetTicketNo() uint {
-	return t.Ticket_no
+	return t.TicketNo
 }
 
 func (t *Ticket1) SetTicketNo(ticketNo uint) {
-	t.Ticket_no = ticketNo
+	t.TicketNo = ticketNo
 }
 
 func (t *Ticket1) GetTicketDescription() string {
-	return t.Ticket_description
+	return t.TicketDescription
 }
 
 func (t *Ticket1) SetTicketDescription(testcaseDescription string) {
-	t.Ticket_description = testcaseDescription
+	t.TicketDescription = testcaseDescription
 }
 
 func (t *Ticket1) AddTestcase(tc *models.TestCase) {

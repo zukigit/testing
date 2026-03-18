@@ -8,30 +8,29 @@ import (
 )
 
 type Ticket2 struct {
-	Ticket_no                                   uint
-	Ticket_description                          string
-	PASSED_count, FAILED_count, MUSTCHECK_count int
-	Testcases                                   []models.TestCase
+	TicketNo          uint
+	TicketDescription string
+	Testcases         []models.TestCase
 }
 
 func (t *Ticket2) NewTestcase(testcaseNo uint, testcaseDescription string) *models.TestCase {
-	return models.NewTestcase(t.Ticket_no, testcaseNo, testcaseDescription)
+	return models.NewTestcase(t.TicketNo, testcaseNo, testcaseDescription)
 }
 
 func (t *Ticket2) GetTicketNo() uint {
-	return t.Ticket_no
+	return t.TicketNo
 }
 
 func (t *Ticket2) SetTicketNo(ticketNo uint) {
-	t.Ticket_no = ticketNo
+	t.TicketNo = ticketNo
 }
 
 func (t *Ticket2) GetTicketDescription() string {
-	return t.Ticket_description
+	return t.TicketDescription
 }
 
 func (t *Ticket2) SetTicketDescription(testcaseDescription string) {
-	t.Ticket_description = testcaseDescription
+	t.TicketDescription = testcaseDescription
 }
 
 func (t *Ticket2) AddTestcase(tc *models.TestCase) {

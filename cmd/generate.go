@@ -37,30 +37,29 @@ const ticketTemplate = `package tickets
 import "github.com/zukigit/testing/models"
 
 type Ticket{{.TicketNum}} struct {
-	Ticket_no                                   uint
-	Ticket_description                          string
-	PASSED_count, FAILED_count, MUSTCHECK_count int
+	TicketNo                                   uint
+	TicketDescription                          string
 	Testcases                                   []models.TestCase
 }
 
 func (t *Ticket{{.TicketNum}}) NewTestcase(testcaseNo uint, testcaseDescription string) *models.TestCase {
-	return models.NewTestcase(t.Ticket_no, testcaseNo, testcaseDescription)
+	return models.NewTestcase(t.TicketNo, testcaseNo, testcaseDescription)
 }
 
 func (t *Ticket{{.TicketNum}}) GetTicketNo() uint {
-	return t.Ticket_no
+	return t.TicketNo
 }
 
 func (t *Ticket{{.TicketNum}}) SetTicketNo(ticketNo uint) {
-	t.Ticket_no = ticketNo
+	t.TicketNo = ticketNo
 }
 
 func (t *Ticket{{.TicketNum}}) GetTicketDescription() string {
-	return t.Ticket_description
+	return t.TicketDescription
 }
 
 func (t *Ticket{{.TicketNum}}) SetTicketDescription(testcaseDescription string) {
-	t.Ticket_description = testcaseDescription
+	t.TicketDescription = testcaseDescription
 }
 
 func (t *Ticket{{.TicketNum}}) AddTestcase(tc *models.TestCase) {
