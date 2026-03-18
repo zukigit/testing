@@ -43,8 +43,8 @@ type Ticket{{.TicketNum}} struct {
 	Testcases                                   []models.TestCase
 }
 
-func (t *Ticket{{.TicketNum}}) NewTestcase(testcase_id uint, testcase_description string) *models.TestCase {
-	return models.NewTestcase(testcase_id, testcase_description)
+func (t *Ticket{{.TicketNum}}) NewTestcase(testcaseNo uint, testcase_description string) *models.TestCase {
+	return models.NewTestcase(t.Ticket_no, testcaseNo, testcase_description)
 }
 
 func (t *Ticket{{.TicketNum}}) GetTicketNo() uint {
@@ -91,6 +91,9 @@ func (t *Ticket{{.TicketNum}}) Prepare() {
 	tc := t.NewTestcase(1, "Enter your test case description here.")
 	tc_func := func() models.TestcaseStatus {
 		//Enter your testcase function here
+
+		//You can log as follow
+		tc.ErrorLog("it is just example")
 		return tc.Failed() // or tc.Passed() or tc.MustCheck()
 	}
 	tc.SetFunction(tc_func)
