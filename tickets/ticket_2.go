@@ -1,6 +1,12 @@
 package tickets
 
-import "github.com/zukigit/testing/models"
+import (
+	"context"
+	"fmt"
+
+	"github.com/zukigit/testing/models"
+	"github.com/zukigit/testing/zabbix"
+)
 
 type Ticket2 struct {
 	Ticket_no                                   uint
@@ -56,11 +62,18 @@ func (t *Ticket2) Prepare() {
 	// TESTCASE 1
 	tc := t.NewTestcase(1, "Enter your test case description here.")
 	tc_func := func() models.TestcaseStatus {
-		//Enter your testcase function here
 
-		//You can log as follow
-		tc.ErrorLog("it is just example")
-		return tc.Failed() // or tc.Passed() or tc.MustCheck()
+		ctx := context.WithoutCancel(context.Background())
+		defer ctx.Done()
+
+		zabbix, err := zabbix.NewZabbix(ctx)
+		if err != nil {
+			tc.ErrorLog(fmt.Sprintf("failed to get zabbix, err: %s", err.Error()))
+			return tc.Failed()
+		}
+
+		tc.InfoLog(fmt.Sprintf("DB Host: %s, DB Port: %s, DB Name: %s, DB Username: %s, DB Password: %s", zabbix.DBHost, zabbix.MappedPort, zabbix.DBName, zabbix.DBUsername, zabbix.DBPassword))
+		return tc.Failed()
 	}
 	tc.SetFunction(tc_func)
 	t.AddTestcase(tc)

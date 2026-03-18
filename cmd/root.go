@@ -124,4 +124,5 @@ func Execute() {
 func init() {
 	// Add your tickets here
 	ts = append(ts, new(tickets.Ticket1))
+	ts = append(ts, new(tickets.Ticket2))
 }
