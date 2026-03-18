@@ -47,7 +47,7 @@ func (t *Ticket{{.TicketNum}}) NewTestcase(testcase_id uint, testcase_descriptio
 	return models.NewTestcase(testcase_id, testcase_description)
 }
 
-func (t *Ticket{{.TicketNum}}) Get_ticket_no() uint {
+func (t *Ticket{{.TicketNum}}) GetTicketNo() uint {
 	return t.Ticket_no
 }
 

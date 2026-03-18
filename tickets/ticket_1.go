@@ -9,11 +9,11 @@ type Ticket1 struct {
 	Testcases                                   []models.TestCase
 }
 
-func (t *Ticket1) NewTestcase(testcase_id uint, testcase_description string) *models.TestCase {
-	return models.NewTestcase(testcase_id, testcase_description)
+func (t *Ticket1) NewTestcase(testcaseNo uint, testcase_description string) *models.TestCase {
+	return models.NewTestcase(t.Ticket_no, testcaseNo, testcase_description)
 }
 
-func (t *Ticket1) Get_ticket_no() uint {
+func (t *Ticket1) GetTicketNo() uint {
 	return t.Ticket_no
 }
 

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -10,6 +11,7 @@ import (
 
 var ts []models.Ticket
 var tcs []models.TestCase
+var failedTcs map[uint]uint
 
 func collectTcs() {
 	for _, ticket := range ts {
@@ -20,28 +22,32 @@ func collectTcs() {
 
 func runTcs() {
 	failedCount := 0
+	failedTcs = make(map[uint]uint)
+
 	for _, testcase := range tcs {
 		testcase.InfoLog("running")
+		status := testcase.Failed()
 		if testcase.IsFunctionNil() {
 			testcase.ErrorLog("testcase function is nil, skipping execution")
-			testcase.SetStatus(models.FAILED)
-			failedCount++
+			status = testcase.Failed()
 		} else {
-			status := testcase.Run_function()
-			if status != testcase.Passed() {
-				failedCount++
-			}
-			testcase.SetStatus(status)
+			status = testcase.RunFunction()
 		}
 
-		testcase.InfoLog(string(testcase.GetStatus()))
+		if status != testcase.Passed() {
+			failedCount++
+			failedTcs[testcase.GetTicketNo()] = testcase.GetTestcaseNo()
+		}
+
+		testcase.InfoLog(string(status))
 	}
 
+	fmt.Println("@@@ FINISHED @@@")
+
 	if failedCount > 0 {
-		for _, testcase := range tcs {
-			if testcase.GetStatus() != testcase.Passed() {
-				testcase.InfoLog(string(testcase.GetStatus()))
-			}
+		fmt.Println("Not Passed testcases:")
+		for ticketNo, testcaseNo := range failedTcs {
+			fmt.Printf("TicketNo: %d, TestcaseNo: %d\n", ticketNo, testcaseNo)
 		}
 	}
 }

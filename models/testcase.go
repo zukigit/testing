@@ -29,31 +29,32 @@ type TestCase struct {
 	Testcase_status      TestcaseStatus
 	Duration             time.Duration
 	function             func() TestcaseStatus
-	ticket_no            uint
+	Ticket_no            uint
 	stdoutLogger         *log.Logger
 	stderrLogger         *log.Logger
 }
 
-func NewTestcase(testcase_id uint, testcase_description string) *TestCase {
+func NewTestcase(ticketNo, testcaseNo uint, testcase_description string) *TestCase {
 
 	return &TestCase{
-		Testcase_no:          testcase_id,
+		Ticket_no:            ticketNo,
+		Testcase_no:          testcaseNo,
 		Testcase_description: testcase_description,
 		stdoutLogger:         log.New(os.Stdout, "", 0),
 		stderrLogger:         log.New(os.Stderr, "", 0),
 	}
 }
 
-func (t *TestCase) Get_testcase_no() uint {
+func (t *TestCase) GetTestcaseNo() uint {
 	return t.Testcase_no
 }
 
-func (t *TestCase) Get_ticket_no() uint {
-	return t.ticket_no
+func (t *TestCase) GetTicketNo() uint {
+	return t.Ticket_no
 }
 
 func (t *TestCase) SetTicketNo(ticket_no uint) {
-	t.ticket_no = ticket_no
+	t.Ticket_no = ticket_no
 }
 
 func (t *TestCase) Get_ticket_description() string {
@@ -76,7 +77,7 @@ func (t *TestCase) SetFunction(function func() TestcaseStatus) {
 	t.function = function
 }
 
-func (t *TestCase) Run_function() TestcaseStatus {
+func (t *TestCase) RunFunction() TestcaseStatus {
 	return t.function()
 }
 
@@ -88,7 +89,7 @@ func (t *TestCase) writeLog(logger *log.Logger, level, msg string) {
 	entry := logEntry{
 		Timestamp:  time.Now().Format(time.RFC3339),
 		Level:      level,
-		TicketNo:   t.ticket_no,
+		TicketNo:   t.Ticket_no,
 		TestcaseNo: t.Testcase_no,
 		Message:    msg,
 	}

@@ -1,7 +1,7 @@
 package models
 
 type Ticket interface {
-	Get_ticket_no() uint
+	GetTicketNo() uint
 	SetTicketNo(ticket_no uint)
 	Get_ticket_description() string
 	SetTicketDescription(testcase_description string)
