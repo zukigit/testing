@@ -70,20 +70,25 @@ func (t *Ticket1) Prepare() {
 	// TESTCASE 0
 	// This testcase is used for preparation for this ticket.
 	// If this testcase fails, the entire ticket will be skipped.
-	tc := t.NewTestcase(0, "Enter your test case description here.")
-	tc_func := func() models.TestcaseStatus {
-		// enter your testcase function here
-		return tc.Failed()
-	}
-	tc.SetFunction(tc_func)
-	t.AddTestcase(tc)
+	tc0 := t.NewTestcase(0, "Enter your test case description here.")
+	tc0.SetFunction(func() models.TestcaseStatus {
+		tc0.InfoLog("getting zabbix...")
+		zbx, err := zabbix.NewZabbix(t.GetContext())
+		if err != nil {
+			tc0.ErrorLog("failed to get zabbix: %v", err)
+			return tc0.Failed()
+		}
+		t.SetZabbix(zbx)
+		return tc0.Passed()
+	})
+	t.AddTestcase(tc0)
 
 	// TESTCASE 1
-	tc = t.NewTestcase(1, "Enter your test case description here.")
-	tc_func = func() models.TestcaseStatus {
-		// enter your testcase function here
-		return tc.Passed()
-	}
-	tc.SetFunction(tc_func)
-	t.AddTestcase(tc)
+	tc1 := t.NewTestcase(1, "Enter your test case description here.")
+	tc1.SetFunction(func() models.TestcaseStatus {
+		t.GetZabbix()
+
+		return tc1.Passed()
+	})
+	t.AddTestcase(tc1)
 }
