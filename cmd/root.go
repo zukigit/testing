@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/zukigit/testing/models"
@@ -53,10 +54,35 @@ func runTcs() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "testing",
-	Short: "run all tickets",
+	Use:   "testing [ticket number]",
+	Short: "run all tickets or a specific ticket",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		collectTcs()
+		if len(args) == 1 {
+			ticketNumStr := args[0]
+			ticketNum, err := strconv.Atoi(ticketNumStr)
+			if err != nil || ticketNum <= 0 {
+				fmt.Println("Invalid ticket number. Must be a positive integer.")
+				os.Exit(1)
+			}
+
+			var found bool
+			for _, ticket := range ts {
+				ticket.Prepare()
+				if ticket.GetTicketNo() == uint(ticketNum) {
+					tcs = ticket.Get_testcases()
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				fmt.Printf("Ticket %d not found\n", ticketNum)
+				os.Exit(1)
+			}
+		} else {
+			collectTcs()
+		}
 		runTcs()
 	},
 }
