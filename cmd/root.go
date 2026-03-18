@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -22,10 +21,9 @@ func collectTcs() {
 
 func runTcs() {
 	for _, testcase := range tcs {
-		// lib.InfoLog.Println("running")
+		testcase.InfoLog("running")
 		if testcase.Is_function_nil() {
-			testcase.Set_status(models.FAILED)
-			// lib.InfoLog.Printf("testcase: %d has no function. SKIPPED", testcase.Get_testcase_no())
+			testcase.ErrorLog("testcase function is nil, skipping execution")
 		} else {
 			// start time
 			startTime := time.Now()
@@ -34,9 +32,8 @@ func runTcs() {
 
 			// total elasped time or duration of testcase
 			duration := time.Since(startTime)
-			durationStr := fmt.Sprintf("%02d:%02d:%02d", int(duration/time.Hour), int(duration/time.Minute)%60, int(duration/time.Second)%60)
 
-			testcase.Set_duration(durationStr)
+			testcase.Set_duration(duration)
 		}
 		// lib.InfoLog.Println("done running!")
 	}

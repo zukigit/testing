@@ -55,9 +55,9 @@ func (t *Ticket1) Prepare() {
 
 	// TESTCASE 1
 	tc := t.New_testcase(1, "Enter your test case description here.")
-	tc_func := func() models.Testcase_status {
+	tc_func := func() models.TestcaseStatus {
 		//Enter your testcase function here
-		return models.FAILED
+		return tc.Failed() // or tc.Passed() or tc.MustCheck()
 	}
 	tc.Set_function(tc_func)
 	t.Add_testcase(tc)

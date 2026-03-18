@@ -1,58 +1,46 @@
 package models
 
-type Testcase_status string
-type Doc_data_type string
+import (
+	"encoding/json"
+	"log"
+	"os"
+	"time"
+)
+
+type TestcaseStatus string
 
 const (
-	PASSED     Testcase_status = "PASSED"
-	FAILED     Testcase_status = "FAILED"
-	MUST_CHECK Testcase_status = "MUST_CHECK"
-
-	PRE_OPT  Doc_data_type = "pre_operation"
-	OPT      Doc_data_type = "operation"
-	EXPT_RES Doc_data_type = "expected_results"
+	PASSED     TestcaseStatus = "PASSED"
+	FAILED     TestcaseStatus = "FAILED"
+	MUST_CHECK TestcaseStatus = "MUST_CHECK"
 )
+
+type logEntry struct {
+	Timestamp  string `json:"timestamp"`
+	Level      string `json:"level"`
+	TicketNo   uint   `json:"ticket_no,omitempty"`
+	TestcaseNo uint   `json:"testcase_no,omitempty"`
+	Message    string `json:"message"`
+}
 
 type TestCase struct {
 	Testcase_no          uint
 	Testcase_description string
-	Testcase_status      *Testcase_status
-	Duration             *string
-	Pre_operation        *[]string
-	Operation            *[]string
-	Expected_results     *[]string
-	function             func() Testcase_status
-	ticket_no            *uint
+	Testcase_status      TestcaseStatus
+	Duration             time.Duration
+	function             func() TestcaseStatus
+	ticket_no            uint
+	stdoutLogger         *log.Logger
+	stderrLogger         *log.Logger
 }
 
 func New_testcase(testcase_id uint, testcase_description string) *TestCase {
-	status := FAILED
-	ticket_no := uint(0)
-	pre_opt := []string{}
-	opt := []string{}
-	expt_res := []string{}
-	var duration string
 
 	return &TestCase{
 		Testcase_no:          testcase_id,
 		Testcase_description: testcase_description,
-		Testcase_status:      &status,
-		Pre_operation:        &pre_opt,
-		Operation:            &opt,
-		Expected_results:     &expt_res,
-		ticket_no:            &ticket_no,
-		Duration:             &duration,
-	}
-}
-
-func (t *TestCase) Add_doc(doc_type Doc_data_type, doc string) {
-	switch doc_type {
-	case PRE_OPT:
-		*t.Pre_operation = append(*t.Pre_operation, doc)
-	case OPT:
-		*t.Operation = append(*t.Operation, doc)
-	case EXPT_RES:
-		*t.Expected_results = append(*t.Expected_results, doc)
+		stdoutLogger:         log.New(os.Stdout, "", 0),
+		stderrLogger:         log.New(os.Stderr, "", 0),
 	}
 }
 
@@ -61,37 +49,73 @@ func (t *TestCase) Get_testcase_no() uint {
 }
 
 func (t *TestCase) Get_ticket_no() uint {
-	return *t.ticket_no
+	return t.ticket_no
 }
 
 func (t *TestCase) Set_ticket_no(ticket_no uint) {
-	*t.ticket_no = ticket_no
+	t.ticket_no = ticket_no
 }
 
 func (t *TestCase) Get_ticket_description() string {
 	return t.Testcase_description
 }
 
-func (t *TestCase) Set_status(status Testcase_status) {
-	*t.Testcase_status = status
+func (t *TestCase) Set_status(status TestcaseStatus) {
+	t.Testcase_status = status
 }
 
-func (t *TestCase) Set_duration(duration string) {
-	*t.Duration = duration
+func (t *TestCase) Set_duration(duration time.Duration) {
+	t.Duration = duration
 }
 
-func (t *TestCase) Get_status() Testcase_status {
-	return *t.Testcase_status
+func (t *TestCase) Get_status() TestcaseStatus {
+	return t.Testcase_status
 }
 
-func (t *TestCase) Set_function(function func() Testcase_status) {
+func (t *TestCase) Set_function(function func() TestcaseStatus) {
 	t.function = function
 }
 
-func (t *TestCase) Run_function() Testcase_status {
+func (t *TestCase) Run_function() TestcaseStatus {
 	return t.function()
 }
 
 func (t *TestCase) Is_function_nil() bool {
 	return t.function == nil
+}
+
+func (t *TestCase) writeLog(logger *log.Logger, level, msg string) {
+	entry := logEntry{
+		Timestamp:  time.Now().Format(time.RFC3339),
+		Level:      level,
+		TicketNo:   t.ticket_no,
+		TestcaseNo: t.Testcase_no,
+		Message:    msg,
+	}
+	data, err := json.Marshal(entry)
+	if err != nil {
+		logger.Printf(`{"level":"ERROR","msg":"failed to marshal log entry: %v"}`, err)
+		return
+	}
+	logger.Println(string(data))
+}
+
+func (t *TestCase) InfoLog(msg string) {
+	t.writeLog(t.stdoutLogger, "INFO", msg)
+}
+
+func (t *TestCase) ErrorLog(msg string) {
+	t.writeLog(t.stderrLogger, "ERROR", msg)
+}
+
+func (t *TestCase) Failed() TestcaseStatus {
+	return FAILED
+}
+
+func (t *TestCase) Passed() TestcaseStatus {
+	return PASSED
+}
+
+func (t *TestCase) MustCheck() TestcaseStatus {
+	return MUST_CHECK
 }
