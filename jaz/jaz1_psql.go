@@ -2,6 +2,7 @@ package jaz
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -17,6 +18,12 @@ type Jaz1Psql struct {
 	zabbix zabbix.Zabbix
 
 	serverDnsName, serverPort, serverHost, serverMappedPort string
+
+	db *sql.DB
+}
+
+func (j *Jaz1Psql) GetDB() *sql.DB {
+	return j.db
 }
 
 func (j *Jaz1Psql) GetEnvs() map[string]string {
