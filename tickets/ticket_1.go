@@ -2,6 +2,7 @@ package tickets
 
 import (
 	"context"
+	"time"
 
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
@@ -91,6 +92,9 @@ func (t *Ticket1) Prepare() {
 	tc1 := t.NewTestcase(1, "Enter your test case description here.")
 	tc1.SetFunction(func() models.TestcaseStatus {
 		t.GetZabbix()
+
+		tc1.InfoLog("sleeping 1 minute")
+		time.Sleep(1 * time.Minute)
 
 		return tc1.Passed()
 	})
