@@ -18,13 +18,14 @@ type ZabbixPsql struct {
 	ServerHost, ServerMappedPort, ServerDnsName, ServerPort string
 	WebHost, WebMappedPort, WebDnsName, WebPort             string
 	NetworkName                                             string
+	envs                                                    map[string]string
 }
 
 func (z *ZabbixPsql) getZabbixDBContainer(ctx context.Context) (testcontainers.Container, error) {
-	z.DBPort = "5432"
-	z.DBDnsName = "zabbix-postgres"
+	z.DBPort = lib.GetEnv(z.envs, "ZABBIX_DB_PORT", "5432")
+	z.DBDnsName = lib.GetEnv(z.envs, "ZABBIX_DB_DNS_NAME", "zabbix-db")
 	req := testcontainers.ContainerRequest{
-		Image:        lib.Getenv("ZABBIX_DB_IMAGE", "postgres:14-alpine3.22"),
+		Image:        lib.GetEnv(z.envs, "ZABBIX_DB_IMAGE", "postgres:14-alpine3.22"),
 		ExposedPorts: []string{fmt.Sprintf("%s/tcp", z.DBPort)},
 		Networks:     []string{z.NetworkName},
 		NetworkAliases: map[string][]string{
@@ -51,11 +52,11 @@ func (z *ZabbixPsql) getZabbixDBContainer(ctx context.Context) (testcontainers.C
 }
 
 func (z *ZabbixPsql) getZabbixServerContainer(ctx context.Context) (testcontainers.Container, error) {
-	z.ServerDnsName = "zabbix-server"
-	z.ServerPort = "10051"
+	z.ServerDnsName = lib.GetEnv(z.envs, "ZABBIX_SERVER_DNS_NAME", "zabbix-server")
+	z.ServerPort = lib.GetEnv(z.envs, "ZABBIX_SERVER_PORT", "10051")
 
 	req := testcontainers.ContainerRequest{
-		Image:        lib.Getenv("ZABBIX_SERVER_IMAGE", "zabbix/zabbix-server-pgsql:7.0-alpine-latest"),
+		Image:        lib.GetEnv(z.envs, "ZABBIX_SERVER_IMAGE", "zabbix/zabbix-server-pgsql:7.0-alpine-latest"),
 		ExposedPorts: []string{fmt.Sprintf("%s/tcp", z.ServerPort)},
 		Networks:     []string{z.NetworkName},
 		NetworkAliases: map[string][]string{
@@ -85,12 +86,13 @@ func (z *ZabbixPsql) getZabbixServerContainer(ctx context.Context) (testcontaine
 }
 
 func (z *ZabbixPsql) getZabbixWebContainer(ctx context.Context) (testcontainers.Container, error) {
-	z.WebDnsName = "zabbix-web"
-	z.WebPort = "8080"
+	z.WebDnsName = lib.GetEnv(z.envs, "ZABBIX_WEB_DNS_NAME", "zabbix-web")
+	z.WebPort = lib.GetEnv(z.envs, "ZABBIX_WEB_PORT", "8080")
+	portWithTcp := fmt.Sprintf("%s/tcp", z.WebPort)
 
 	req := testcontainers.ContainerRequest{
-		Image:        lib.Getenv("ZABBIX_WEB_IMAGE", "zabbix/zabbix-web-nginx-pgsql:7.0-alpine-latest"),
-		ExposedPorts: []string{fmt.Sprintf("%s/tcp", z.WebPort)},
+		Image:        lib.GetEnv(z.envs, "ZABBIX_WEB_IMAGE", "zabbix/zabbix-web-nginx-pgsql:7.0-alpine-latest"),
+		ExposedPorts: []string{portWithTcp},
 		Networks:     []string{z.NetworkName},
 		NetworkAliases: map[string][]string{
 			z.NetworkName: {z.WebDnsName},
@@ -101,12 +103,12 @@ func (z *ZabbixPsql) getZabbixWebContainer(ctx context.Context) (testcontainers.
 			"POSTGRES_USER":     z.DBUsername,
 			"POSTGRES_PASSWORD": z.DBPassword,
 			"ZBX_SERVER_HOST":   z.ServerDnsName,
-			"PHP_TZ":            "Asia/Yangon",
+			"PHP_TZ":            lib.GetEnv(z.envs, "ZABBIX_WEB_PHP_TZ", "Asia/Yangon"),
 		},
 		WaitingFor: wait.ForAll(
-			wait.ForListeningPort("8080/tcp").WithStartupTimeout(2*time.Minute),
+			wait.ForListeningPort(nat.Port(portWithTcp)).WithStartupTimeout(2*time.Minute),
 			wait.ForHTTP("/").
-				WithPort("8080/tcp").
+				WithPort(nat.Port(portWithTcp)).
 				WithStatusCodeMatcher(func(status int) bool {
 					return status == http.StatusOK || status == http.StatusFound
 				}).
@@ -145,11 +147,12 @@ func (z *ZabbixPsql) GetWebPort() string       { return z.WebPort }
 func (z *ZabbixPsql) GetNetworkName() string { return z.NetworkName }
 
 // zabbix represents active running container
-func NewZabbixPsql(ctx context.Context) (Zabbix, error) {
+func NewZabbixPsql(ctx context.Context, envs map[string]string) (Zabbix, error) {
 	zabbix := &ZabbixPsql{
-		DBUsername: lib.Getenv("ZABBIX_DB_USER", "zabbix"),
-		DBPassword: lib.Getenv("ZABBIX_DB_PASSWORD", "zabbix"),
-		DBName:     lib.Getenv("ZABBIX_DB_NAME", "zabbix"),
+		DBUsername: lib.GetEnv(envs, "ZABBIX_DB_USER", "zabbix"),
+		DBPassword: lib.GetEnv(envs, "ZABBIX_DB_PASSWORD", "zabbix"),
+		DBName:     lib.GetEnv(envs, "ZABBIX_DB_NAME", "zabbix"),
+		envs:       envs,
 	}
 
 	net, err := network.New(ctx, network.WithDriver("bridge"))

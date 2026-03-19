@@ -32,14 +32,14 @@ type Zabbix interface {
 	GetNetworkName() string
 }
 
-func NewZabbix(ctx context.Context) (Zabbix, error) {
-	dbType := lib.Getenv("ZABBIX_DB_TYPE", "")
+func NewZabbix(ctx context.Context, envs map[string]string) (Zabbix, error) {
+	dbType := lib.GetEnv(envs, "ZABBIX_DB_TYPE", "")
 
 	switch models.DBType(dbType) {
 	case models.DBTypeMysql:
 		return nil, nil
 	case models.DBTypePsql:
-		return NewZabbixPsql(ctx)
+		return NewZabbixPsql(ctx, envs)
 	default:
 		return nil, fmt.Errorf("unknown db type: %s", dbType)
 	}

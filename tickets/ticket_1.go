@@ -2,7 +2,6 @@ package tickets
 
 import (
 	"context"
-	"time"
 
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
@@ -73,8 +72,12 @@ func (t *Ticket1) Prepare() {
 	// If this testcase fails, the entire ticket will be skipped.
 	tc0 := t.NewTestcase(0, "Enter your test case description here.")
 	tc0.SetFunction(func() models.TestcaseStatus {
+		envs := map[string]string{
+			"ZABBIX_DB_TYPE": "psql",
+		}
+
 		tc0.InfoLog("getting zabbix...")
-		zbx, err := zabbix.NewZabbix(t.GetContext())
+		zbx, err := zabbix.NewZabbix(t.GetContext(), envs)
 		if err != nil {
 			tc0.ErrorLog("failed to get zabbix: %v", err)
 			return tc0.Failed()
@@ -89,8 +92,6 @@ func (t *Ticket1) Prepare() {
 	tc1.SetFunction(func() models.TestcaseStatus {
 		t.GetZabbix()
 
-		tc1.InfoLog("waiting for 1 minute...")
-		time.Sleep(1 * time.Minute)
 		return tc1.Passed()
 	})
 	t.AddTestcase(tc1)
