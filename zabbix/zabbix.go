@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/testcontainers/testcontainers-go"
 	"github.com/zukigit/testing/lib"
 	"github.com/zukigit/testing/models"
 )
@@ -15,18 +16,21 @@ type Zabbix interface {
 	GetDBName() string
 	GetDBDnsName() string // only for docker internal communication
 	GetDBPort() string    // only for docker internal communication
+	GetDBContainer() testcontainers.Container
 
 	// server
 	GetServerHost() string       // it can be used in testcases
 	GetServerMappedPort() string // it can be used in testcases
 	GetServerDnsName() string    // only for docker internal communication
 	GetServerPort() string       // only for docker internal communication
+	GetServerContainer() testcontainers.Container
 
 	// web
 	GetWebHost() string       // it can be used in testcases
 	GetWebMappedPort() string // it can be used in testcases
 	GetWebDnsName() string    // only for docker internal communication
 	GetWebPort() string       // only for docker internal communication
+	GetWebContainer() testcontainers.Container
 
 	// network
 	GetNetworkName() string

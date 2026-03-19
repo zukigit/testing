@@ -20,6 +20,12 @@ type jaz1Psql struct {
 	serverDnsName, serverPort, serverHost, serverMappedPort string
 
 	db *sql.DB
+
+	serverContainer testcontainers.Container
+}
+
+func (j *jaz1Psql) GetServerContainer() testcontainers.Container {
+	return j.serverContainer
 }
 
 func (j *jaz1Psql) GetDB() *sql.DB {
@@ -56,21 +62,12 @@ func newJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabb
 		zabbix: zabbix,
 	}
 
-	serverContainer, err := jaz1Psql.newServer(ctx)
+	// server
+	container, err := jaz1Psql.newServer(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create jaz server container, err: %s", err.Error())
 	}
-
-	jaz1Psql.serverHost, err = serverContainer.Host(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get jaz server host, err: %s", err.Error())
-	}
-
-	mappedPort, err := serverContainer.MappedPort(ctx, nat.Port(fmt.Sprintf("%s/tcp", jaz1Psql.serverPort)))
-	if err != nil {
-		return nil, fmt.Errorf("failed to get jaz server mapped port, err: %s", err.Error())
-	}
-	jaz1Psql.serverMappedPort = mappedPort.Port()
+	jaz1Psql.serverContainer = container
 
 	return jaz1Psql, nil
 }
@@ -108,6 +105,17 @@ func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to generic container, err: %s", err.Error())
 	}
+
+	j.serverHost, err = container.Host(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get jaz server host, err: %s", err.Error())
+	}
+
+	mappedPort, err := container.MappedPort(ctx, nat.Port(fmt.Sprintf("%s/tcp", j.serverPort)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get jaz server mapped port, err: %s", err.Error())
+	}
+	j.serverMappedPort = mappedPort.Port()
 
 	return container, nil
 }

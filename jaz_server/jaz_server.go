@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/testcontainers/testcontainers-go"
 	"github.com/zukigit/testing/lib"
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
@@ -16,6 +17,8 @@ type JazServer interface {
 	GetServerPort() string
 	GetServerHost() string
 	GetServerMappedPort() string
+
+	GetServerContainer() testcontainers.Container
 }
 
 // NewJazServer creates and returns a new JazServer instance.

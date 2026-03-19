@@ -19,7 +19,31 @@ type ZabbixPsql struct {
 	webHost, webMappedPort, webDnsName, webPort             string
 	networkName                                             string
 	envs                                                    map[string]string
+	dbContainer, serverContainer, webContainer              testcontainers.Container
 }
+
+// getters
+func (z *ZabbixPsql) GetDBUsername() string { return z.dbUsername }
+func (z *ZabbixPsql) GetDBPassword() string { return z.dbPassword }
+func (z *ZabbixPsql) GetDBName() string     { return z.dbName }
+func (z *ZabbixPsql) GetDBDnsName() string  { return z.dbDnsName }
+func (z *ZabbixPsql) GetDBPort() string     { return z.dbPort }
+
+func (z *ZabbixPsql) GetServerHost() string       { return z.serverHost }
+func (z *ZabbixPsql) GetServerMappedPort() string { return z.serverMappedPort }
+func (z *ZabbixPsql) GetServerDnsName() string    { return z.serverDnsName }
+func (z *ZabbixPsql) GetServerPort() string       { return z.serverPort }
+
+func (z *ZabbixPsql) GetWebHost() string       { return z.webHost }
+func (z *ZabbixPsql) GetWebMappedPort() string { return z.webMappedPort }
+func (z *ZabbixPsql) GetWebDnsName() string    { return z.webDnsName }
+func (z *ZabbixPsql) GetWebPort() string       { return z.webPort }
+
+func (z *ZabbixPsql) GetNetworkName() string { return z.networkName }
+
+func (z *ZabbixPsql) GetDBContainer() testcontainers.Container     { return z.dbContainer }
+func (z *ZabbixPsql) GetServerContainer() testcontainers.Container { return z.serverContainer }
+func (z *ZabbixPsql) GetWebContainer() testcontainers.Container    { return z.webContainer }
 
 func (z *ZabbixPsql) getZabbixDBContainer(ctx context.Context) (testcontainers.Container, error) {
 	z.dbPort = lib.GetEnv(z.envs, "ZABBIX_DB_PORT", "5432")
@@ -82,6 +106,17 @@ func (z *ZabbixPsql) getZabbixServerContainer(ctx context.Context) (testcontaine
 		return nil, fmt.Errorf("failed to generic container, err: %s", err.Error())
 	}
 
+	z.serverHost, err = container.Host(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zabbix server host, err: %s", err.Error())
+	}
+
+	mappedPort, err := container.MappedPort(ctx, nat.Port(fmt.Sprintf("%s/tcp", z.serverPort)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zabbix server mapped port, err: %s", err.Error())
+	}
+	z.serverMappedPort = mappedPort.Port()
+
 	return container, nil
 }
 
@@ -124,27 +159,19 @@ func (z *ZabbixPsql) getZabbixWebContainer(ctx context.Context) (testcontainers.
 		return nil, fmt.Errorf("failed to start zabbix-web container: %s", err.Error())
 	}
 
+	z.webHost, err = container.Host(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zabbix web host, err: %s", err.Error())
+	}
+
+	mappedPort, err := container.MappedPort(ctx, nat.Port(fmt.Sprintf("%s/tcp", z.webPort)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zabbix web mapped port, err: %s", err.Error())
+	}
+	z.webMappedPort = mappedPort.Port()
+
 	return container, nil
 }
-
-// getters
-func (z *ZabbixPsql) GetDBUsername() string { return z.dbUsername }
-func (z *ZabbixPsql) GetDBPassword() string { return z.dbPassword }
-func (z *ZabbixPsql) GetDBName() string     { return z.dbName }
-func (z *ZabbixPsql) GetDBDnsName() string  { return z.dbDnsName }
-func (z *ZabbixPsql) GetDBPort() string     { return z.dbPort }
-
-func (z *ZabbixPsql) GetServerHost() string       { return z.serverHost }
-func (z *ZabbixPsql) GetServerMappedPort() string { return z.serverMappedPort }
-func (z *ZabbixPsql) GetServerDnsName() string    { return z.serverDnsName }
-func (z *ZabbixPsql) GetServerPort() string       { return z.serverPort }
-
-func (z *ZabbixPsql) GetWebHost() string       { return z.webHost }
-func (z *ZabbixPsql) GetWebMappedPort() string { return z.webMappedPort }
-func (z *ZabbixPsql) GetWebDnsName() string    { return z.webDnsName }
-func (z *ZabbixPsql) GetWebPort() string       { return z.webPort }
-
-func (z *ZabbixPsql) GetNetworkName() string { return z.networkName }
 
 // zabbix represents active running container
 func NewZabbixPsql(ctx context.Context, envs map[string]string) (Zabbix, error) {
@@ -162,44 +189,22 @@ func NewZabbixPsql(ctx context.Context, envs map[string]string) (Zabbix, error) 
 	zabbix.networkName = net.Name
 
 	// zabbix db
-	_, err = zabbix.getZabbixDBContainer(ctx)
+	zabbix.dbContainer, err = zabbix.getZabbixDBContainer(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get zabbix DB container, err: %s", err.Error())
 	}
 
-	zbxServerContainer, err := zabbix.getZabbixServerContainer(ctx)
+	// zabbix server
+	zabbix.serverContainer, err = zabbix.getZabbixServerContainer(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get zabbix server container, err: %s", err.Error())
 	}
 
-	// zabbix server
-	zabbix.serverHost, err = zbxServerContainer.Host(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get zabbix server host, err: %s", err.Error())
-	}
-
-	mappedPort, err := zbxServerContainer.MappedPort(ctx, nat.Port(fmt.Sprintf("%s/tcp", zabbix.serverPort)))
-	if err != nil {
-		return nil, fmt.Errorf("failed to get zabbix server mapped port, err: %s", err.Error())
-	}
-	zabbix.serverMappedPort = mappedPort.Port()
-
 	// zabbix web
-	zbxWebContainer, err := zabbix.getZabbixWebContainer(ctx)
+	zabbix.webContainer, err = zabbix.getZabbixWebContainer(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get zabbix web container, err: %s", err.Error())
 	}
-
-	zabbix.webHost, err = zbxWebContainer.Host(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get zabbix web host, err: %s", err.Error())
-	}
-
-	mappedPort, err = zbxWebContainer.MappedPort(ctx, nat.Port(fmt.Sprintf("%s/tcp", zabbix.webPort)))
-	if err != nil {
-		return nil, fmt.Errorf("failed to get zabbix web mapped port, err: %s", err.Error())
-	}
-	zabbix.webMappedPort = mappedPort.Port()
 
 	return zabbix, nil
 }
