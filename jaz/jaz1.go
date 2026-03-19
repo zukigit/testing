@@ -3,9 +3,11 @@ package jaz
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/zukigit/testing/lib"
 	"github.com/zukigit/testing/zabbix"
 )
@@ -88,7 +90,8 @@ func (j *Jaz1) newServer(ctx context.Context) (testcontainers.Container, error) 
 		NetworkAliases: map[string][]string{
 			j.zabbix.GetNetworkName(): {j.serverDnsName},
 		},
-		Env: j.envs,
+		Env:        j.envs,
+		WaitingFor: wait.ForListeningPort(nat.Port(portWithTcp)).WithStartupTimeout(5 * time.Minute),
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
