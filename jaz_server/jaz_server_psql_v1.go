@@ -1,4 +1,4 @@
-package jaz
+package jaz_server
 
 import (
 	"context"
