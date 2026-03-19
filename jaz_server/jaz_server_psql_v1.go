@@ -15,7 +15,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib" // postgres driver
 )
 
-type jaz1Psql struct {
+type jazServerPsqlV1 struct {
 	envs   map[string]string
 	zabbix zabbix.Zabbix
 
@@ -26,39 +26,39 @@ type jaz1Psql struct {
 	serverContainer testcontainers.Container
 }
 
-func (j *jaz1Psql) GetServerContainer() testcontainers.Container {
+func (j *jazServerPsqlV1) GetServerContainer() testcontainers.Container {
 	return j.serverContainer
 }
 
-func (j *jaz1Psql) GetDB() *sql.DB {
+func (j *jazServerPsqlV1) GetDB() *sql.DB {
 	return j.db
 }
 
-func (j *jaz1Psql) GetEnvs() map[string]string {
+func (j *jazServerPsqlV1) GetEnvs() map[string]string {
 	return j.envs
 }
 
-func (j *jaz1Psql) GetZabbix() zabbix.Zabbix {
+func (j *jazServerPsqlV1) GetZabbix() zabbix.Zabbix {
 	return j.zabbix
 }
 
-func (j *jaz1Psql) GetServerDnsName() string {
+func (j *jazServerPsqlV1) GetServerDnsName() string {
 	return j.serverDnsName
 }
 
-func (j *jaz1Psql) GetServerPort() string {
+func (j *jazServerPsqlV1) GetServerPort() string {
 	return j.serverPort
 }
 
-func (j *jaz1Psql) GetServerHost() string {
+func (j *jazServerPsqlV1) GetServerHost() string {
 	return j.serverHost
 }
 
-func (j *jaz1Psql) GetServerMappedPort() string {
+func (j *jazServerPsqlV1) GetServerMappedPort() string {
 	return j.serverMappedPort
 }
 
-func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, error) {
+func (j *jazServerPsqlV1) newServer(ctx context.Context) (testcontainers.Container, error) {
 	j.serverDnsName = lib.GetEnv(j.envs, "JAZ_SERVER_DNS_NAME", "jaz-server")
 	j.serverPort = lib.GetEnv(j.envs, "JAZ_SERVER_PORT", "10061")
 	portWithTcp := fmt.Sprintf("%s/tcp", j.serverPort)
@@ -106,7 +106,7 @@ func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, err
 	return container, nil
 }
 
-func (j *jaz1Psql) connectDB() error {
+func (j *jazServerPsqlV1) connectDB() error {
 	// we will use zabbix db because jaz1 use zabbix database
 	host := j.zabbix.GetDBHost()
 	port := j.zabbix.GetDBMappedPort()
@@ -129,24 +129,24 @@ func (j *jaz1Psql) connectDB() error {
 	return db.Ping()
 }
 
-func newJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
-	jaz1Psql := &jaz1Psql{
+func newjazServerPsqlV1(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
+	jazServerPsqlV1 := &jazServerPsqlV1{
 		envs:   envs,
 		zabbix: zabbix,
 	}
 
 	// server
-	container, err := jaz1Psql.newServer(ctx)
+	container, err := jazServerPsqlV1.newServer(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create jaz server container, err: %s", err.Error())
 	}
-	jaz1Psql.serverContainer = container
+	jazServerPsqlV1.serverContainer = container
 
 	// db
-	err = jaz1Psql.connectDB()
+	err = jazServerPsqlV1.connectDB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect jaz db, err: %s", err.Error())
 	}
 
-	return jaz1Psql, nil
+	return jazServerPsqlV1, nil
 }
