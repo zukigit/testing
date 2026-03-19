@@ -50,7 +50,7 @@ func (j *Jaz1Psql) GetServerMappedPort() string {
 	return j.serverMappedPort
 }
 
-func NewJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (Jaz, error) {
+func NewJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
 	jaz1Psql := &Jaz1Psql{
 		envs:   envs,
 		zabbix: zabbix,

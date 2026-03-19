@@ -3,6 +3,7 @@ package tickets
 import (
 	"context"
 
+	jaz "github.com/zukigit/testing/jaz_server"
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
 )
@@ -73,7 +74,9 @@ func (t *Ticket1) Prepare() {
 	tc0 := t.NewTestcase(0, "Enter your test case description here.")
 	tc0.SetFunction(func() models.TestcaseStatus {
 		envs := map[string]string{
-			"ZABBIX_DB_TYPE": "psql",
+			"ZABBIX_DB_TYPE":     "psql",
+			"JAZ_SERVER_VERSION": "1",
+			"JAZ_DB_TYPE":        string(models.DBTypePsql),
 		}
 
 		tc0.InfoLog("getting zabbix...")
@@ -84,12 +87,12 @@ func (t *Ticket1) Prepare() {
 		}
 		t.SetZabbix(zbx)
 
-		// tc0.InfoLog("getting jaz server...")
-		// _, err = jaz.NewJaz1(t.GetContext(), envs, t.GetZabbix())
-		// if err != nil {
-		// 	tc0.ErrorLog("failed to get jaz server: %v", err)
-		// 	return tc0.Failed()
-		// }
+		tc0.InfoLog("getting jaz server...")
+		_, err = jaz.NewJaz1Psql(t.GetContext(), envs, t.GetZabbix())
+		if err != nil {
+			tc0.ErrorLog("failed to get jaz server: %v", err)
+			return tc0.Failed()
+		}
 
 		return tc0.Passed()
 	})
