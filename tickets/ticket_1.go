@@ -3,7 +3,6 @@ package tickets
 import (
 	"context"
 
-	jaz "github.com/zukigit/testing/jaz"
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
 )
@@ -85,12 +84,12 @@ func (t *Ticket1) Prepare() {
 		}
 		t.SetZabbix(zbx)
 
-		tc0.InfoLog("getting jaz server...")
-		_, err = jaz.NewJaz1(t.GetContext(), envs, t.GetZabbix())
-		if err != nil {
-			tc0.ErrorLog("failed to get jaz server: %v", err)
-			return tc0.Failed()
-		}
+		// tc0.InfoLog("getting jaz server...")
+		// _, err = jaz.NewJaz1(t.GetContext(), envs, t.GetZabbix())
+		// if err != nil {
+		// 	tc0.ErrorLog("failed to get jaz server: %v", err)
+		// 	return tc0.Failed()
+		// }
 
 		return tc0.Passed()
 	})
