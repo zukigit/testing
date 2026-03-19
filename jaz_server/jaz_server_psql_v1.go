@@ -13,7 +13,7 @@ import (
 	"github.com/zukigit/testing/zabbix"
 )
 
-type Jaz1Psql struct {
+type jaz1Psql struct {
 	envs   map[string]string
 	zabbix zabbix.Zabbix
 
@@ -22,36 +22,36 @@ type Jaz1Psql struct {
 	db *sql.DB
 }
 
-func (j *Jaz1Psql) GetDB() *sql.DB {
+func (j *jaz1Psql) GetDB() *sql.DB {
 	return j.db
 }
 
-func (j *Jaz1Psql) GetEnvs() map[string]string {
+func (j *jaz1Psql) GetEnvs() map[string]string {
 	return j.envs
 }
 
-func (j *Jaz1Psql) GetZabbix() zabbix.Zabbix {
+func (j *jaz1Psql) GetZabbix() zabbix.Zabbix {
 	return j.zabbix
 }
 
-func (j *Jaz1Psql) GetServerDnsName() string {
+func (j *jaz1Psql) GetServerDnsName() string {
 	return j.serverDnsName
 }
 
-func (j *Jaz1Psql) GetServerPort() string {
+func (j *jaz1Psql) GetServerPort() string {
 	return j.serverPort
 }
 
-func (j *Jaz1Psql) GetServerHost() string {
+func (j *jaz1Psql) GetServerHost() string {
 	return j.serverHost
 }
 
-func (j *Jaz1Psql) GetServerMappedPort() string {
+func (j *jaz1Psql) GetServerMappedPort() string {
 	return j.serverMappedPort
 }
 
-func NewJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
-	jaz1Psql := &Jaz1Psql{
+func newJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
+	jaz1Psql := &jaz1Psql{
 		envs:   envs,
 		zabbix: zabbix,
 	}
@@ -75,7 +75,7 @@ func NewJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabb
 	return jaz1Psql, nil
 }
 
-func (j *Jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, error) {
+func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, error) {
 	j.serverDnsName = lib.GetEnv(j.envs, "JAZ_SERVER_DNS_NAME", "jaz-server")
 	j.serverPort = lib.GetEnv(j.envs, "JAZ_SERVER_PORT", "10061")
 	portWithTcp := fmt.Sprintf("%s/tcp", j.serverPort)
@@ -91,7 +91,7 @@ func (j *Jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, err
 	j.envs["DEBUGLEVEL"] = lib.GetEnv(j.envs, j.envs["DEBUGLEVEL"], "3")
 
 	req := testcontainers.ContainerRequest{
-		Image:        lib.GetEnv(j.envs, "JAZ_SERVER_IMAGE", "jobarg-server-postgres:6.0.9-1"),
+		Image:        j.envs["JAZ_SERVER_IMAGE"],
 		ExposedPorts: []string{portWithTcp},
 		Networks:     []string{j.zabbix.GetNetworkName()},
 		NetworkAliases: map[string][]string{

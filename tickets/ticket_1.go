@@ -74,9 +74,10 @@ func (t *Ticket1) Prepare() {
 	tc0 := t.NewTestcase(0, "Enter your test case description here.")
 	tc0.SetFunction(func() models.TestcaseStatus {
 		envs := map[string]string{
-			"ZABBIX_DB_TYPE":     "psql",
-			"JAZ_SERVER_VERSION": "1",
+			"ZABBIX_DB_TYPE":     string(models.DBTypePsql),
+			"JAZ_SERVER_IMAGE":   string(models.JazServer609ImagePsql),
 			"JAZ_DB_TYPE":        string(models.DBTypePsql),
+			"JAZ_SERVER_VERSION": "1",
 		}
 
 		tc0.InfoLog("getting zabbix...")
@@ -88,7 +89,7 @@ func (t *Ticket1) Prepare() {
 		t.SetZabbix(zbx)
 
 		tc0.InfoLog("getting jaz server...")
-		_, err = jaz_server.NewJaz1Psql(t.GetContext(), envs, t.GetZabbix())
+		_, err = jaz_server.NewJazServer(t.GetContext(), envs, t.GetZabbix())
 		if err != nil {
 			tc0.ErrorLog("failed to get jaz server: %v", err)
 			return tc0.Failed()

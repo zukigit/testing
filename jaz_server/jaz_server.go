@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/zukigit/testing/lib"
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
 )
@@ -20,12 +21,22 @@ type JazServer interface {
 // mandatory envs:
 // JAZ_SERVER_VERSION - version of JAZ_SERVER to test (e.g. "1")
 // JAZ_DB_TYPE - type of database to use (e.g. "psql")
-func NewJaz(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
+// JAZ_SERVER_IMAGE - docker image to use for the server (e.g. "jobarg-server-postgres:6.0.9-1")
+func NewJazServer(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
+	err := lib.CheckEmptyValues(envs, []string{
+		"JAZ_SERVER_VERSION",
+		"JAZ_DB_TYPE",
+		"JAZ_SERVER_IMAGE",
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	switch envs["JAZ_SERVER_VERSION"] {
 	case "1":
 		switch models.DBType(envs["JAZ_DB_TYPE"]) {
 		case models.DBTypePsql:
-			return NewJaz1Psql(ctx, envs, zabbix)
+			return newJaz1Psql(ctx, envs, zabbix)
 		default:
 			return nil, fmt.Errorf("unsupported database: %s", envs["JAZ_DB"])
 		}
