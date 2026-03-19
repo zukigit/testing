@@ -69,6 +69,12 @@ func newJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabb
 	}
 	jaz1Psql.serverContainer = container
 
+	// db
+	err = jaz1Psql.connectDB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect jaz db, err: %s", err.Error())
+	}
+
 	return jaz1Psql, nil
 }
 
@@ -118,4 +124,9 @@ func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, err
 	j.serverMappedPort = mappedPort.Port()
 
 	return container, nil
+}
+
+func (j *jaz1Psql) connectDB() error {
+
+	return nil
 }
