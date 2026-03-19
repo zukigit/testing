@@ -11,23 +11,27 @@ import (
 	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/zukigit/testing/lib"
+	"github.com/zukigit/testing/models"
 )
 
 type ZabbixPsql struct {
-	dbUsername, dbPassword, dbName, dbDnsName, dbPort       string
-	serverHost, serverMappedPort, serverDnsName, serverPort string
-	webHost, webMappedPort, webDnsName, webPort             string
-	networkName                                             string
-	envs                                                    map[string]string
-	dbContainer, serverContainer, webContainer              testcontainers.Container
+	dbUsername, dbPassword, dbName, dbDnsName, dbPort, dbSslMode, dbHost, dbMappedPort string
+	serverHost, serverMappedPort, serverDnsName, serverPort                            string
+	webHost, webMappedPort, webDnsName, webPort                                        string
+	networkName                                                                        string
+	envs                                                                               map[string]string
+	dbContainer, serverContainer, webContainer                                         testcontainers.Container
 }
 
 // getters
-func (z *ZabbixPsql) GetDBUsername() string { return z.dbUsername }
-func (z *ZabbixPsql) GetDBPassword() string { return z.dbPassword }
-func (z *ZabbixPsql) GetDBName() string     { return z.dbName }
-func (z *ZabbixPsql) GetDBDnsName() string  { return z.dbDnsName }
-func (z *ZabbixPsql) GetDBPort() string     { return z.dbPort }
+func (z *ZabbixPsql) GetDBUsername() string   { return z.dbUsername }
+func (z *ZabbixPsql) GetDBPassword() string   { return z.dbPassword }
+func (z *ZabbixPsql) GetDBName() string       { return z.dbName }
+func (z *ZabbixPsql) GetDBDnsName() string    { return z.dbDnsName }
+func (z *ZabbixPsql) GetDBPort() string       { return z.dbPort }
+func (z *ZabbixPsql) GetDBSslMode() string    { return z.dbSslMode }
+func (z *ZabbixPsql) GetDBHost() string       { return z.dbHost }
+func (z *ZabbixPsql) GetDBMappedPort() string { return z.dbMappedPort }
 
 func (z *ZabbixPsql) GetServerHost() string       { return z.serverHost }
 func (z *ZabbixPsql) GetServerMappedPort() string { return z.serverMappedPort }
@@ -48,9 +52,12 @@ func (z *ZabbixPsql) GetWebContainer() testcontainers.Container    { return z.we
 func (z *ZabbixPsql) getZabbixDBContainer(ctx context.Context) (testcontainers.Container, error) {
 	z.dbPort = lib.GetEnv(z.envs, "ZABBIX_DB_PORT", "5432")
 	z.dbDnsName = lib.GetEnv(z.envs, "ZABBIX_DB_DNS_NAME", "zabbix-db")
+	z.dbSslMode = lib.GetEnv(z.envs, "ZABBIX_DB_SSL_MODE", string(models.SslModeDisable))
+	portUrl := fmt.Sprintf("%s/tcp", z.dbPort)
+
 	req := testcontainers.ContainerRequest{
 		Image:        lib.GetEnv(z.envs, "ZABBIX_DB_IMAGE", "postgres:14-alpine3.22"),
-		ExposedPorts: []string{fmt.Sprintf("%s/tcp", z.dbPort)},
+		ExposedPorts: []string{portUrl},
 		Networks:     []string{z.networkName},
 		NetworkAliases: map[string][]string{
 			z.networkName: {z.dbDnsName},
@@ -71,6 +78,17 @@ func (z *ZabbixPsql) getZabbixDBContainer(ctx context.Context) (testcontainers.C
 	if err != nil {
 		return nil, fmt.Errorf("failed to generic container, err: %s", err.Error())
 	}
+
+	z.dbHost, err = container.Host(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zabbix server host, err: %s", err.Error())
+	}
+
+	mappedPort, err := container.MappedPort(ctx, nat.Port(portUrl))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zabbix server mapped port, err: %s", err.Error())
+	}
+	z.dbMappedPort = mappedPort.Port()
 
 	return container, nil
 }

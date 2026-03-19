@@ -17,6 +17,9 @@ type Zabbix interface {
 	GetDBDnsName() string // only for docker internal communication
 	GetDBPort() string    // only for docker internal communication
 	GetDBContainer() testcontainers.Container
+	GetDBSslMode() string
+	GetDBHost() string
+	GetDBMappedPort() string
 
 	// server
 	GetServerHost() string       // it can be used in testcases

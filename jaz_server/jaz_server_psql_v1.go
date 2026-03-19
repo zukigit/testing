@@ -11,6 +11,8 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/zukigit/testing/lib"
 	"github.com/zukigit/testing/zabbix"
+
+	_ "github.com/jackc/pgx/v5/stdlib" // postgres driver
 )
 
 type jaz1Psql struct {
@@ -54,28 +56,6 @@ func (j *jaz1Psql) GetServerHost() string {
 
 func (j *jaz1Psql) GetServerMappedPort() string {
 	return j.serverMappedPort
-}
-
-func newJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
-	jaz1Psql := &jaz1Psql{
-		envs:   envs,
-		zabbix: zabbix,
-	}
-
-	// server
-	container, err := jaz1Psql.newServer(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create jaz server container, err: %s", err.Error())
-	}
-	jaz1Psql.serverContainer = container
-
-	// db
-	err = jaz1Psql.connectDB()
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect jaz db, err: %s", err.Error())
-	}
-
-	return jaz1Psql, nil
 }
 
 func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, error) {
@@ -127,6 +107,46 @@ func (j *jaz1Psql) newServer(ctx context.Context) (testcontainers.Container, err
 }
 
 func (j *jaz1Psql) connectDB() error {
+	// we will use zabbix db because jaz1 use zabbix database
+	host := j.zabbix.GetDBHost()
+	port := j.zabbix.GetDBMappedPort()
+	user := j.zabbix.GetDBUsername()
+	password := j.zabbix.GetDBPassword()
+	dbname := j.zabbix.GetDBName()
+	sslMode := j.zabbix.GetDBSslMode()
 
-	return nil
+	// Build connection string
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		host, port, user, password, dbname, sslMode)
+
+	// Open a database connection
+	db, err := sql.Open("pgx", psqlInfo)
+	if err != nil {
+		return fmt.Errorf("failed to open database connection, err: %s", err.Error())
+	}
+	j.db = db
+
+	return db.Ping()
+}
+
+func newJaz1Psql(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
+	jaz1Psql := &jaz1Psql{
+		envs:   envs,
+		zabbix: zabbix,
+	}
+
+	// server
+	container, err := jaz1Psql.newServer(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create jaz server container, err: %s", err.Error())
+	}
+	jaz1Psql.serverContainer = container
+
+	// db
+	err = jaz1Psql.connectDB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect jaz db, err: %s", err.Error())
+	}
+
+	return jaz1Psql, nil
 }
