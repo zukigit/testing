@@ -22,6 +22,12 @@ type Zabbix interface {
 	GetServerDnsName() string    // only for docker internal communication
 	GetServerPort() string       // only for docker internal communication
 
+	// web
+	GetWebHost() string       // it can be used in testcases
+	GetWebMappedPort() string // it can be used in testcases
+	GetWebDnsName() string    // only for docker internal communication
+	GetWebPort() string       // only for docker internal communication
+
 	// network
 	GetNetworkName() string
 }
