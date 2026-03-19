@@ -18,10 +18,12 @@ type JazServer interface {
 	GetServerMappedPort() string
 }
 
-// mandatory envs:
-// JAZ_SERVER_VERSION - version of JAZ_SERVER to test (e.g. "1")
-// JAZ_DB_TYPE - type of database to use (e.g. "psql")
-// JAZ_SERVER_IMAGE - docker image to use for the server (e.g. "jobarg-server-postgres:6.0.9-1")
+// NewJazServer creates and returns a new JazServer instance.
+//
+// Required environment variables (via envs):
+//   - JAZ_SERVER_VERSION: version of the JAZ server to test (e.g. "1")
+//   - JAZ_DB_TYPE:        database type to use (e.g. "psql")
+//   - JAZ_SERVER_IMAGE:   Docker image for the server (e.g. "jobarg-server-postgres:6.0.9-1")
 func NewJazServer(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
 	err := lib.CheckEmptyValues(envs, []string{
 		"JAZ_SERVER_VERSION",
