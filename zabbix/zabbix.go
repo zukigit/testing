@@ -43,8 +43,6 @@ func NewZabbix(ctx context.Context, envs map[string]string) (Zabbix, error) {
 	dbType := lib.GetEnv(envs, "ZABBIX_DB_TYPE", "")
 
 	switch models.DBType(dbType) {
-	case models.DBTypeMysql:
-		return nil, nil
 	case models.DBTypePsql:
 		return newZabbixPsql(ctx, envs)
 	default:
