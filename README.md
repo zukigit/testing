@@ -1,1 +1,1 @@
-# It is automated integration testing
+# Automated integration testing
