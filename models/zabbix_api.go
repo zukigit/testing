@@ -10,13 +10,18 @@ const (
 type ZabbixAPIMethod string
 
 const (
-	UserLogin       ZabbixAPIMethod = "user.login"
-	HostCreate      ZabbixAPIMethod = "host.create"
-	HostGet         ZabbixAPIMethod = "host.get"
-	HostDelete      ZabbixAPIMethod = "host.delete"
-	HostGroupGet    ZabbixAPIMethod = "hostgroup.get"
-	HostGroupCreate ZabbixAPIMethod = "hostgroup.create"
+	UserLogin           ZabbixAPIMethod = "user.login"
+	HostCreate          ZabbixAPIMethod = "host.create"
+	HostGet             ZabbixAPIMethod = "host.get"
+	HostDelete          ZabbixAPIMethod = "host.delete"
+	HostUpdate          ZabbixAPIMethod = "host.update"
+	HostGroupGet        ZabbixAPIMethod = "hostgroup.get"
+	HostGroupCreate     ZabbixAPIMethod = "hostgroup.create"
+	ConfigurationImport ZabbixAPIMethod = "configuration.import"
+	TemplateGet         ZabbixAPIMethod = "template.get"
 )
+
+const ZabbixAPITimeout = 60 // seconds
 
 type ApiRequest struct {
 	Jsonrpc string `json:"jsonrpc"`
@@ -61,8 +66,16 @@ type Interface struct {
 }
 
 type ZbxHost struct {
-	Hostname string
-	IP       string
-	DNS      string
-	UseIP    bool
+	Hostname   string
+	IP         string
+	DNS        string
+	UseIP      bool
+	HostMacros []HostMacro
+	Templates  []string
+}
+
+type HostMacro struct {
+	Macro       string `json:"macro"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
 }

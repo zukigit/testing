@@ -12,7 +12,7 @@ import (
 	"github.com/zukigit/testing/models"
 )
 
-type ZabbixAPIClientV7 struct {
+type ZabbixAPIClientV6 struct {
 	URL        string
 	Username   string
 	Password   string
@@ -20,7 +20,7 @@ type ZabbixAPIClientV7 struct {
 	HTTPClient *http.Client
 }
 
-func newZabbixClientV7(config models.ZabbixAPIConfig) (*ZabbixAPIClientV7, error) {
+func newZabbixClientV6(config models.ZabbixAPIConfig) (*ZabbixAPIClientV6, error) {
 	username := config.Username
 	if username == "" {
 		username = "Admin"
@@ -31,7 +31,7 @@ func newZabbixClientV7(config models.ZabbixAPIConfig) (*ZabbixAPIClientV7, error
 		password = "zabbix"
 	}
 
-	client := &ZabbixAPIClientV7{
+	client := &ZabbixAPIClientV6{
 		URL:      fmt.Sprintf("http://%s:%s/api_jsonrpc.php", config.WebHost, config.WebPort),
 		Username: username,
 		Password: password,
@@ -48,7 +48,7 @@ func newZabbixClientV7(config models.ZabbixAPIConfig) (*ZabbixAPIClientV7, error
 }
 
 // ---------- Generic API Call ----------
-func (c *ZabbixAPIClientV7) call(method models.ZabbixAPIMethod, params any, result any) error {
+func (c *ZabbixAPIClientV6) call(method models.ZabbixAPIMethod, params any, result any) error {
 	// Ensure auth
 	if c.Auth == "" && method != models.UserLogin {
 		if err := c.login(); err != nil {
@@ -92,7 +92,7 @@ func (c *ZabbixAPIClientV7) call(method models.ZabbixAPIMethod, params any, resu
 }
 
 // ---------- login ----------
-func (c *ZabbixAPIClientV7) login() error {
+func (c *ZabbixAPIClientV6) login() error {
 	var result string
 
 	err := c.call(models.UserLogin, map[string]any{
@@ -108,7 +108,7 @@ func (c *ZabbixAPIClientV7) login() error {
 	return nil
 }
 
-func (c *ZabbixAPIClientV7) ensureHostGroup(name string) (string, error) {
+func (c *ZabbixAPIClientV6) ensureHostGroup(name string) (string, error) {
 	// 1. Try to get existing group
 	var resp []struct {
 		GroupID string `json:"groupid"`
@@ -147,7 +147,7 @@ func (c *ZabbixAPIClientV7) ensureHostGroup(name string) (string, error) {
 	return createResp.GroupIDs[0], nil
 }
 
-func (c *ZabbixAPIClientV7) getTemplateByName(name string) (string, error) {
+func (c *ZabbixAPIClientV6) getTemplateByName(name string) (string, error) {
 	var resp []struct {
 		TemplateID string `json:"templateid"`
 		Name       string `json:"name"`
@@ -169,7 +169,7 @@ func (c *ZabbixAPIClientV7) getTemplateByName(name string) (string, error) {
 	return resp[0].TemplateID, nil
 }
 
-func (c *ZabbixAPIClientV7) getHostID(name string) (string, error) {
+func (c *ZabbixAPIClientV6) getHostID(name string) (string, error) {
 	var resp []struct {
 		HostID string `json:"hostid"`
 	}
@@ -191,7 +191,7 @@ func (c *ZabbixAPIClientV7) getHostID(name string) (string, error) {
 }
 
 // ---------- Exposed Functions ----------
-func (c *ZabbixAPIClientV7) CreateHost(host models.ZbxHost) error {
+func (c *ZabbixAPIClientV6) CreateHost(host models.ZbxHost) error {
 
 	// 1. Ensure hostgroup
 	groupID, err := c.ensureHostGroup("Job Arranger")
@@ -268,7 +268,7 @@ func (c *ZabbixAPIClientV7) CreateHost(host models.ZbxHost) error {
 	return nil
 }
 
-func (c *ZabbixAPIClientV7) ImportTemplate(tmplFilePath string) error {
+func (c *ZabbixAPIClientV6) ImportTemplate(tmplFilePath string) error {
 	sourceData, err := os.ReadFile(tmplFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read import file '%s': %v", tmplFilePath, err)
@@ -312,7 +312,7 @@ func (c *ZabbixAPIClientV7) ImportTemplate(tmplFilePath string) error {
 	return nil
 }
 
-func (c *ZabbixAPIClientV7) AddHostMacros(hostName string, newMacros []models.HostMacro) error {
+func (c *ZabbixAPIClientV6) AddHostMacros(hostName string, newMacros []models.HostMacro) error {
 	if len(newMacros) == 0 {
 		return fmt.Errorf("no host macro is provided")
 	}
@@ -383,7 +383,7 @@ func (c *ZabbixAPIClientV7) AddHostMacros(hostName string, newMacros []models.Ho
 	return nil
 }
 
-func (c *ZabbixAPIClientV7) AttachHostTemplates(hostName string, templateNames []string) error {
+func (c *ZabbixAPIClientV6) AttachHostTemplates(hostName string, templateNames []string) error {
 
 	if len(templateNames) == 0 {
 		return nil
