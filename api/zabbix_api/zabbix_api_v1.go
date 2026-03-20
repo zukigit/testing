@@ -7,3 +7,9 @@ type ZabbixApiV1 struct {
 }
 
 func (z *ZabbixApiV1) GetZabbix() zabbix.Zabbix { return z.zabbix }
+
+func newZabbixApiV1(zabbix zabbix.Zabbix) ZabbixApi {
+	return &ZabbixApiV1{
+		zabbix: zabbix,
+	}
+}

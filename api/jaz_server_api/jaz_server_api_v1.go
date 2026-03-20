@@ -12,3 +12,10 @@ type JazServerApiV1 struct {
 
 func (j *JazServerApiV1) GetJazServer() jaz_server.JazServer { return j.jazServer }
 func (j *JazServerApiV1) GetZabbix() zabbix.Zabbix           { return j.zabbix }
+
+func newJazServerApiV1(zabbix zabbix.Zabbix, jazServer jaz_server.JazServer) JazServerApi {
+	return &JazServerApiV1{
+		jazServer: jazServer,
+		zabbix:    zabbix,
+	}
+}

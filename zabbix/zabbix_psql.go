@@ -192,7 +192,7 @@ func (z *ZabbixPsql) getZabbixWebContainer(ctx context.Context) (testcontainers.
 }
 
 // zabbix represents active running container
-func NewZabbixPsql(ctx context.Context, envs map[string]string) (Zabbix, error) {
+func newZabbixPsql(ctx context.Context, envs map[string]string) (Zabbix, error) {
 	zabbix := &ZabbixPsql{
 		dbUsername: lib.GetEnv(envs, "ZABBIX_DB_USER", "zabbix"),
 		dbPassword: lib.GetEnv(envs, "ZABBIX_DB_PASSWORD", "zabbix"),

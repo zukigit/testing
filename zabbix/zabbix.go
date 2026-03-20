@@ -46,7 +46,7 @@ func NewZabbix(ctx context.Context, envs map[string]string) (Zabbix, error) {
 	case models.DBTypeMysql:
 		return nil, nil
 	case models.DBTypePsql:
-		return NewZabbixPsql(ctx, envs)
+		return newZabbixPsql(ctx, envs)
 	default:
 		return nil, fmt.Errorf("unknown db type: %s", dbType)
 	}

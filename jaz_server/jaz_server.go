@@ -41,7 +41,7 @@ func NewJazServer(ctx context.Context, envs map[string]string, zabbix zabbix.Zab
 	case "1":
 		switch models.DBType(envs["JAZ_DB_TYPE"]) {
 		case models.DBTypePsql:
-			return newjazServerPsqlV1(ctx, envs, zabbix)
+			return newJazServerPsqlV1(ctx, envs, zabbix)
 		default:
 			return nil, fmt.Errorf("unsupported database: %s", envs["JAZ_DB"])
 		}
