@@ -4,6 +4,7 @@ import (
 	"context"
 
 	jaz_server "github.com/zukigit/testing/jaz_server"
+	"github.com/zukigit/testing/lib"
 	"github.com/zukigit/testing/models"
 	"github.com/zukigit/testing/zabbix"
 )
@@ -13,17 +14,6 @@ type Ticket1 struct {
 	TicketDescription string
 	Testcases         []models.TestCase
 	context           context.Context
-
-	// share objects
-	zabbix zabbix.Zabbix
-}
-
-func (t *Ticket1) SetZabbix(zabbix zabbix.Zabbix) {
-	t.zabbix = zabbix
-}
-
-func (t *Ticket1) GetZabbix() zabbix.Zabbix {
-	return t.zabbix
 }
 
 func (t *Ticket1) SetContext(ctx context.Context) {
@@ -86,10 +76,10 @@ func (t *Ticket1) Prepare() {
 			tc0.ErrorLog("failed to get zabbix: %v", err)
 			return tc0.Failed()
 		}
-		t.SetZabbix(zbx)
+		t.SetContext(context.WithValue(t.GetContext(), "zabbix-psql", zbx))
 
 		tc0.InfoLog("getting jaz server...")
-		_, err = jaz_server.NewJazServer(t.GetContext(), envs, t.GetZabbix())
+		_, err = jaz_server.NewJazServer(t.GetContext(), envs, zbx)
 		if err != nil {
 			tc0.ErrorLog("failed to get jaz server: %v", err)
 			return tc0.Failed()
@@ -102,7 +92,11 @@ func (t *Ticket1) Prepare() {
 	// TESTCASE 1
 	tc1 := t.NewTestcase(1, "Enter your test case description here.")
 	tc1.SetFunction(func() models.TestcaseStatus {
-		t.GetZabbix()
+		_, ok := lib.GetFromContext[zabbix.Zabbix](t.GetContext(), "zabbix-psql")
+		if !ok {
+			tc1.ErrorLog("failed to get zabbix from context")
+			return tc1.Failed()
+		}
 
 		return tc1.Passed()
 	})

@@ -28,6 +28,10 @@ type JazServer interface {
 //   - JAZ_DB_TYPE:        database type to use (e.g. "psql")
 //   - JAZ_SERVER_IMAGE:   Docker image for the server (e.g. "jobarg-server-postgres:6.0.9-1")
 func NewJazServer(ctx context.Context, envs map[string]string, zabbix zabbix.Zabbix) (JazServer, error) {
+	if zabbix == nil {
+		return nil, fmt.Errorf("zabbix is nil")
+	}
+
 	err := lib.CheckEmptyValues(envs, []string{
 		"JAZ_SERVER_VERSION",
 		"JAZ_DB_TYPE",

@@ -38,7 +38,6 @@ import (
 	"context"
 
 	"github.com/zukigit/testing/models"
-	"github.com/zukigit/testing/zabbix"
 )
 
 type Ticket{{.TicketNum}} struct {
@@ -46,19 +45,7 @@ type Ticket{{.TicketNum}} struct {
 	TicketDescription string
 	Testcases         []models.TestCase
 	context           context.Context
-
-	// share objects
-	zabbix zabbix.Zabbix
 }
-
-func (t *Ticket{{.TicketNum}}) SetZabbix(zabbix zabbix.Zabbix) {
-	t.zabbix = zabbix
-}
-
-func (t *Ticket{{.TicketNum}}) GetZabbix() zabbix.Zabbix {
-	return t.zabbix
-}
-
 
 func (t *Ticket{{.TicketNum}}) SetContext(ctx context.Context) {
 	t.context = ctx
